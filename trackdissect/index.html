@@ -130,13 +130,141 @@
     }
 
     .hero-grid {
+      display: grid;
       grid-template-columns: minmax(320px, .88fr) minmax(440px, 1.12fr);
       align-items: start;
-      margin-top: 26px
+      margin-top: 26px;
+      gap: 24px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .panel {
-      padding: 22px
+    body[data-app-state="idle"] .hero-grid {
+      grid-template-columns: 1fr;
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .panel-preview,
+    .quality-selector,
+    #message {
+      transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    body[data-app-state="idle"] .panel-preview,
+    body[data-app-state="idle"] .quality-selector,
+    body[data-app-state="idle"] #message {
+      display: none !important;
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    .dropzone-area {
+      position: relative;
+      padding: 42px 24px;
+      border: 2px dashed rgba(255, 138, 42, 0.15);
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.01);
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      min-height: 220px;
+      outline: none;
+    }
+
+    .dropzone-area:hover,
+    .dropzone-area.drag-over {
+      background: rgba(255, 138, 42, 0.06);
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      border-style: solid;
+    }
+
+    .dropzone-area.drag-over {
+      box-shadow: 0 0 0 4px rgba(255, 138, 42, 0.15);
+    }
+
+    .icon-upload {
+      display: grid;
+      place-items: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: rgba(255, 138, 42, 0.1);
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .dropzone-area strong {
+      font-size: 1.15rem;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+
+    .dropzone-area .formats {
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      font-weight: 500;
+      text-transform: uppercase;
+    }
+
+    #fileInput {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    #analyzeBtn {
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    #analyzeBtn:disabled {
+      background: rgba(255, 138, 42, 0.05);
+      color: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.05);
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    #analyzeBtn.pulse:not(:disabled) {
+      animation: buttonPulse 2.2s infinite ease-out;
+    }
+
+    @keyframes buttonPulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(255, 138, 42, 0.4);
+      }
+
+      70% {
+        box-shadow: 0 0 0 15px rgba(255, 138, 42, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(255, 138, 42, 0);
+      }
+    }
+
+    .skip-ai-sublabel {
+      display: block;
+      font-size: 0.68rem;
+      color: var(--muted);
+      font-style: italic;
+      margin-top: 4px;
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: normal;
     }
 
     .upload {
@@ -1517,7 +1645,7 @@
   </style>
 </head>
 
-<body>
+<body data-app-state="idle">
   <main class="shell">
     <section class="hero">
       <div class="eyebrow">AI Production Analyzer</div>
@@ -1525,32 +1653,46 @@
       <p>Upload a rough bounce, split it into vocals, instrumental, and detailed stems, inspect its sonic profile, and
         turn audio features into a fast production breakdown built for reference hunting.</p>
       <div class="hero-grid">
-        <section class="panel upload">
-          <div class="dropzone">
-            <strong>Upload MP3, WAV, AAC, or M4A</strong>
-            <div class="fine">Single file, up to 12MB. Waveform preview appears before analysis, then vocals and
-              instrumental exports are generated alongside detailed stems.</div>
+        <section class="panel upload panel-upload">
+          <div class="dropzone-area" id="dropzone">
+            <div class="icon-upload">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 18V5l12-2v13" />
+                <circle cx="6" cy="18" r="3" />
+                <circle cx="18" cy="16" r="3" />
+              </svg>
+            </div>
+            <strong>Drop your track here or click to browse</strong>
+            <div class="formats">MP3 · WAV · AAC · M4A · max 12MB</div>
+            <input id="fileInput" type="file"
+              accept=".mp3,.wav,.aac,.m4a,audio/mpeg,audio/wav,audio/aac,audio/mp4,audio/x-m4a,audio/mp4a-latm">
           </div>
-          <input id="fileInput" type="file"
-            accept=".mp3,.wav,.aac,.m4a,audio/mpeg,audio/wav,audio/aac,audio/mp4,audio/x-m4a,audio/mp4a-latm">
+
           <div class="quality-selector">
-            <span class="eyebrow" style="margin-bottom: 8px; display: block; font-size: 0.7rem;">Processing
+            <span class="eyebrow"
+              style="margin-bottom: 8px; display: block; font-size: 0.75rem; letter-spacing: 0.08em;">Processing
               Quality</span>
             <div class="quality-grid">
               <button type="button" class="quality-opt active" data-quality="fast">Fast</button>
               <button type="button" class="quality-opt" data-quality="accurate">Accurate</button>
             </div>
-            <label class="skip-opt"
-              style="margin-top: 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
-              <input type="checkbox" id="skipReportToggle"
-                style="width: 14px; height: 14px; accent-color: var(--accent);">
-              <span class="fine"
-                style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700; color: var(--muted);">Skip AI
-                Production Report</span>
+            <label class="skip-opt" style="margin-top: 16px; display: block; cursor: pointer; user-select: none;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" id="skipReportToggle"
+                  style="width: 16px; height: 16px; accent-color: var(--accent);">
+                <div>
+                  <span class="fine"
+                    style="font-size: 0.68rem; text-transform: uppercase; font-weight: 800; color: var(--text);">Skip AI
+                    Production Report</span>
+                  <span class="skip-ai-sublabel">Faster processing, no production insights</span>
+                </div>
+              </div>
             </label>
           </div>
-          <button id="analyzeBtn">Analyze Track</button>
-          <div id="message" class="fine">Waiting for audio.</div>
+
+          <button id="analyzeBtn" disabled>Analyze Track</button>
+          <div id="message" class="fine" style="display: none;"></div>
           <div id="progressShell" class="progress-shell" data-status="idle">
             <div id="reAnalyzeOverlay" class="re-analyzing-overlay">
               <div class="fine" style="font-weight: 700; color: var(--accent);">Re-analyzing section...</div>
@@ -1591,7 +1733,7 @@
             </details>
           </div>
         </section>
-        <section class="panel">
+        <section class="panel panel-preview">
           <div class="meta">
             <div><strong id="fileName">No file selected</strong><span id="fileMeta">Load a short track to preview the
                 waveform.</span></div><span class="eyebrow">Preview</span>
@@ -1736,6 +1878,7 @@
     const SESSION_KEY = 'audipsy:last-session';
     const LEGACY_SESSION_KEY = 'trackdissect:last-session';
     const fileInput = document.getElementById('fileInput');
+    const dropzone = document.getElementById('dropzone');
     const analyzeBtn = document.getElementById('analyzeBtn');
     const cancelBtn = document.getElementById('cancelBtn');
     const message = document.getElementById('message');
@@ -1785,6 +1928,7 @@
     const resultsSection = document.getElementById('resultsSection');
     const downloadAllZip = document.getElementById('downloadAllZip');
     state.player.preload = 'auto';
+    updateAppUIState('idle');
 
     fileInput.addEventListener('change', async (event) => {
       const nextFile = event.target.files?.[0];
@@ -1819,7 +1963,45 @@
         setMessage(error.message || 'Audio preview is unavailable, but you can still analyze the file.', true);
       }
       if (document.activeElement === fileInput) fileInput.blur();
+      updateAppUIState('file_loaded');
     });
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(name => {
+      dropzone.addEventListener(name, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(name => {
+      dropzone.addEventListener(name, () => dropzone.classList.add('drag-over'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(name => {
+      dropzone.addEventListener(name, () => dropzone.classList.remove('drag-over'), false);
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const file = dt.files[0];
+      if (file) {
+        fileInput.files = dt.files;
+        fileInput.dispatchEvent(new Event('change'));
+      }
+    }, false);
+
+    function updateAppUIState(stateName) {
+      document.body.dataset.appState = stateName;
+      if (stateName === 'file_loaded') {
+        analyzeBtn.disabled = false;
+        analyzeBtn.classList.add('pulse');
+      } else if (stateName === 'idle') {
+        analyzeBtn.disabled = true;
+        analyzeBtn.classList.remove('pulse');
+      } else {
+        analyzeBtn.classList.remove('pulse');
+      }
+    }
     trimStartHandle.addEventListener('pointerdown', (event) => beginTrimDrag(event, 'start'));
     trimEndHandle.addEventListener('pointerdown', (event) => beginTrimDrag(event, 'end'));
     trimSelection.addEventListener('pointerdown', handleTrimSelectionPointerDown);
@@ -1940,6 +2122,7 @@
       progressShell.classList.add('active');
       renderProcessingState({ status: 'queued', stage: 'queue', progress: 5, message: 'Upload received.', activity: [{ at: new Date().toISOString(), phase: 'queue', text: 'Upload accepted. Waiting for the background worker to begin.' }], technical_logs: [] });
       state.poller = setInterval(checkStatus, 1000);
+      updateAppUIState('analyzing');
       checkStatus();
     }
 
@@ -1966,6 +2149,7 @@
           state.lastAnalyzedEnd = state.trimEnd;
           scheduleWaveformDraw();
           await loadResults();
+          updateAppUIState('complete');
           resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         if (data.status === 'error') {
@@ -2495,7 +2679,8 @@
       resetProcessingUI();
       resultsSection.style.display = 'none';
       nextStepsArea.classList.remove('active');
-      setMessage('Waiting for audio.');
+      setMessage('');
+      updateAppUIState('idle');
     }
 
     function resetProcessingUI() {
