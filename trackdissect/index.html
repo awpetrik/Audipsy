@@ -2064,7 +2064,12 @@
       const label = capitalizeWords(stem.replace(/_/g, ' '));
       const range = `${info.features.frequency_range.low_hz}-${info.features.frequency_range.high_hz} Hz`;
       const energy = capitalize(info.features.energy_level);
+
+      const bars = buildStemBars(stem, info.features, isPrimary ? 16 : 14);
+      const instruments = renderChipList(info.analysis.detected_instruments, isPrimary ? 3 : 2);
+      const fxList = (info.analysis.likely_fx && info.analysis.likely_fx.length) ? info.analysis.likely_fx : (info.features.technical_fx || []);
       const fx = renderChipList(fxList, isPrimary ? 3 : 2);
+
       const idleLabel = isPrimary ? 'Preview stem' : 'Play';
       const bpm = (info.features.bpm && info.features.bpm > 0) ? info.features.bpm : '—';
 
