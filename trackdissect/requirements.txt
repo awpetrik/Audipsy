@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+python-multipart
+librosa
+numpy
+soundfile
+anthropic
+google-genai
+demucs

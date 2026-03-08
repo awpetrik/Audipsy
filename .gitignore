@@ -1,0 +1,23 @@
+.DS_Store
+
+# Local Codex metadata
+SKILL.md
+
+# Python environments and caches
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local environment files
+.env
+.env.*
+
+# Generated application data
+trackdissect/data/
+
+# Editor settings
+.idea/
+.vscode/

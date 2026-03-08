@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrackDissect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Oxanium:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#060816;--panel:#0d1326;--panel-2:#121b33;--line:rgba(122,170,255,.18);--text:#eef2ff;--muted:#9ba7c8;--cyan:#63f5df;--amber:#ffbb63;--danger:#ff7d7d}
+    *{box-sizing:border-box}body{margin:0;font-family:"IBM Plex Sans",sans-serif;color:var(--text);background:radial-gradient(circle at top,#132447 0,#060816 48%),#060816}
+    body::before{content:"";position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(#000,transparent 92%);pointer-events:none}
+    .shell{width:min(1100px,calc(100% - 28px));margin:24px auto 40px}.hero,.panel,.card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01));border:1px solid var(--line);border-radius:24px;box-shadow:0 20px 70px rgba(0,0,0,.28)}
+    .hero{padding:28px 28px 22px;position:relative;overflow:hidden}.hero::after{content:"";position:absolute;inset:auto -40px -40px auto;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,var(--amber),transparent 70%);opacity:.18}
+    .eyebrow,.kpi-label{font:600 .75rem/1 "Oxanium",sans-serif;text-transform:uppercase;letter-spacing:.18em;color:var(--cyan)}h1,h2,h3{font-family:"Oxanium",sans-serif;margin:0}
+    h1{font-size:clamp(2.2rem,7vw,4.6rem);letter-spacing:.05em}.hero p{max-width:680px;color:var(--muted);margin:12px 0 0;line-height:1.6}
+    .hero-grid,.results{display:grid;gap:18px}.hero-grid{grid-template-columns:1.15fr .85fr;margin-top:24px}.panel{padding:22px}.upload{display:grid;gap:14px}
+    .dropzone{border:1px dashed rgba(99,245,223,.35);border-radius:20px;padding:22px;background:rgba(99,245,223,.05)}.dropzone strong{display:block;margin-bottom:6px}
+    input[type=file]{width:100%;padding:14px;border-radius:14px;border:1px solid var(--line);background:#09111f;color:var(--text)}
+    button,.ghost{border:none;border-radius:999px;padding:13px 18px;background:linear-gradient(90deg,var(--cyan),#94ffd6);color:#04131d;font:700 .9rem/1 "Oxanium",sans-serif;cursor:pointer}
+    button[disabled]{opacity:.5;cursor:not-allowed}.ghost{background:transparent;color:var(--text);border:1px solid var(--line);display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+    .meta,.kpis,.stats,.report-list{display:grid;gap:12px}.meta{grid-template-columns:1fr auto}.meta strong{display:block;font-size:1rem}.meta span,.fine,.muted{color:var(--muted)}
+    canvas{width:100%;height:140px;background:linear-gradient(180deg,rgba(99,245,223,.05),rgba(255,255,255,.02));border:1px solid var(--line);border-radius:18px}
+    .trim-box{margin-top:14px;padding:16px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.02)}
+    .trim-metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}.trim-metrics div{padding:14px;border-radius:16px;border:1px solid rgba(255,255,255,.06);background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015))}
+    .trim-metrics span{display:block;color:var(--muted);margin-bottom:6px}.trim-metrics strong,.trim-readout strong,.trim-ruler strong{font-family:"Oxanium",sans-serif}
+    .trim-note{margin-top:12px;color:var(--muted)}
+    .trim-ruler{display:flex;justify-content:space-between;gap:12px;margin-top:14px;color:var(--muted);font-size:.82rem}
+    .trim-slider{position:relative;height:64px;margin-top:10px;touch-action:none}.trim-track,.trim-selection{position:absolute;top:50%;transform:translateY(-50%);border-radius:999px}
+    .trim-track{left:0;right:0;height:18px;background:#05070f;box-shadow:inset 0 3px 8px rgba(0,0,0,.65),0 0 16px rgba(0,0,0,.22)}
+    .trim-selection{left:0;width:0;height:26px;background:linear-gradient(90deg,rgba(99,245,223,.82),rgba(255,187,99,.72));border:1px solid rgba(255,255,255,.08);box-shadow:0 0 24px rgba(99,245,223,.18);cursor:grab}
+    .trim-selection.dragging{cursor:grabbing}
+    .trim-handle{position:absolute;top:50%;transform:translate(-50%,-50%);width:22px;height:38px;padding:0;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:linear-gradient(180deg,#f4f6ff,#9ca4bb);box-shadow:0 10px 24px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.55)}
+    .trim-handle::after{content:"";display:block;width:8px;height:18px;margin:auto;border-radius:4px;background:repeating-linear-gradient(180deg,rgba(4,19,29,.58),rgba(4,19,29,.58) 2px,transparent 2px,transparent 4px)}.trim-handle:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+    .trim-handle[disabled]{opacity:.45;cursor:not-allowed}
+    .trim-readout{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .progress-shell{display:none;margin-top:12px}.progress-shell.active{display:block}.bar{height:12px;border-radius:999px;background:#0a1020;border:1px solid var(--line);overflow:hidden}.fill{height:100%;width:0;background:linear-gradient(90deg,var(--amber),var(--cyan));transition:width .35s ease}
+    .kpis{grid-template-columns:repeat(3,1fr)}.kpi{padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.02)}.kpi strong{display:block;font-size:1.2rem;margin-top:6px}
+    .results{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin-top:18px}.card{padding:18px 18px 20px}.stem-card{position:relative;display:grid;gap:16px;overflow:hidden;min-height:460px;background:linear-gradient(180deg,rgba(12,20,42,.92),rgba(7,12,28,.96));border-color:rgba(122,170,255,.22);transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}.stem-card::before{content:"";position:absolute;inset:-35% auto auto -10%;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(99,245,223,.12),transparent 72%);pointer-events:none}
+    .stem-card:hover{transform:translateY(-3px);border-color:rgba(99,245,223,.3);box-shadow:0 26px 80px rgba(0,0,0,.34)}.stem-card[data-state=playing]{border-color:rgba(99,245,223,.42);box-shadow:0 28px 90px rgba(0,0,0,.4),0 0 0 1px rgba(99,245,223,.1) inset}.stem-card[data-state=loading]{border-color:rgba(255,187,99,.36)}
+    .stem-top,.stem-ident,.stem-title-row,.stem-status,.card-actions{display:flex;align-items:center}.stem-top,.stem-title-row,.card-actions{justify-content:space-between;gap:14px}.stem-ident{gap:14px}.stem-copy{min-width:0}.stem-copy h3{text-transform:capitalize;font-size:2rem;line-height:.95}.stem-title-row{align-items:flex-start}.confidence-pill{padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.08);font:.73rem/1 "Oxanium",sans-serif;letter-spacing:.08em;text-transform:uppercase}.confidence-pill.high{background:rgba(99,245,223,.1);color:var(--cyan)}.confidence-pill.medium{background:rgba(255,187,99,.1);color:#ffd49d}.confidence-pill.low{background:rgba(255,125,125,.12);color:#ffb3b3}
+    .icon{width:54px;height:54px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(180deg,rgba(99,245,223,.12),rgba(99,245,223,.04));border:1px solid rgba(99,245,223,.26);font:700 1.05rem/1 "Oxanium",sans-serif;text-transform:uppercase;color:var(--cyan);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+    .stem-status{gap:8px;margin-top:10px;color:var(--muted);font-size:.92rem}.status-dot{width:10px;height:10px;border-radius:50%;background:rgba(155,167,200,.6);box-shadow:0 0 0 5px rgba(155,167,200,.08)}.stem-card[data-state=loading] .status-dot{background:var(--amber);box-shadow:0 0 0 5px rgba(255,187,99,.12);animation:pulseDot 1s ease-in-out infinite}.stem-card[data-state=playing] .status-dot{background:var(--cyan);box-shadow:0 0 0 5px rgba(99,245,223,.12);animation:pulseDot .85s ease-in-out infinite}.stem-card[data-state=error] .status-dot{background:var(--danger);box-shadow:0 0 0 5px rgba(255,125,125,.12)}
+    .transport{min-width:132px;justify-content:center;gap:10px;padding:14px 18px;font-size:.86rem;letter-spacing:.06em;text-transform:uppercase}.transport-orb{width:12px;height:12px;border-radius:50%;background:currentColor;box-shadow:0 0 0 4px rgba(255,255,255,.06)}.transport[data-state=loading] .transport-orb{border:2px solid rgba(255,255,255,.18);border-top-color:currentColor;background:transparent;animation:spin .8s linear infinite}.transport[data-state=playing]{background:linear-gradient(90deg,var(--cyan),#b6ffe6);color:#04131d;border:none}.transport[data-state=error]{color:#ffb3b3;border-color:rgba(255,125,125,.22)}
+    .stem-visual{position:relative;padding:14px 14px 12px;border-radius:18px;border:1px solid rgba(255,255,255,.06);background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015));overflow:hidden}.stem-visual::after{content:"";position:absolute;inset:auto -20px -55px auto;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(255,187,99,.12),transparent 72%);pointer-events:none}
+    .visual-grid{height:88px;display:grid;grid-template-columns:repeat(18,1fr);align-items:end;gap:6px}.visual-grid span{display:block;height:var(--bar);border-radius:999px 999px 4px 4px;background:linear-gradient(180deg,rgba(99,245,223,.92),rgba(99,245,223,.2));transform-origin:bottom center;transition:opacity .2s ease,transform .2s ease}.stem-card[data-state=playing] .visual-grid span{animation:equalize 1.15s ease-in-out infinite;animation-delay:var(--delay)}.stem-card[data-state=loading] .visual-grid span{animation:equalize 1.4s ease-in-out infinite;animation-delay:var(--delay);opacity:.68}
+    .visual-footer{display:flex;justify-content:space-between;gap:12px;margin-top:12px;color:var(--muted);font-size:.85rem}.visual-footer strong{display:block;color:var(--text);font-family:"Oxanium",sans-serif;font-size:1rem}
+    .stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{padding:12px 13px;border-radius:16px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02)}.metric span{display:block;color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em}.metric strong{display:block;margin-top:6px;font:700 1.02rem/1.2 "Oxanium",sans-serif;color:var(--text)}.metric-wide{grid-column:1 / -1}
+    .section-label{font:.76rem/1 "Oxanium",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{padding:8px 11px;border-radius:999px;background:rgba(255,187,99,.1);border:1px solid rgba(255,187,99,.18);color:#ffd8aa;font-size:.84rem}
+    .card-actions{margin-top:auto}.download-link{min-width:164px;justify-content:center}.report-list li{padding:10px 0;border-top:1px solid rgba(255,255,255,.06)}.report-list li:first-child{border-top:none;padding-top:0}
+    @keyframes spin{to{transform:rotate(360deg)}}@keyframes pulseDot{50%{transform:scale(1.18)}}@keyframes equalize{0%,100%{transform:scaleY(.72)}50%{transform:scaleY(1.08)}}
+    .report{margin-top:18px;padding:22px}.report-list{list-style:none;padding:0;margin:14px 0 0}.status-error{color:var(--danger)}audio{width:100%;margin-top:12px}
+    @media (max-width:780px){.hero-grid,.kpis{grid-template-columns:1fr}.shell{width:min(100% - 20px,1100px)}.hero{padding:22px}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="eyebrow">AI Production Analyzer</div>
+      <h1>TrackDissect</h1>
+      <p>Upload a rough bounce, split it into stems, inspect its sonic profile, and turn audio features into a fast production breakdown built for reference hunting.</p>
+      <div class="hero-grid">
+        <section class="panel upload">
+          <div class="dropzone">
+            <strong>Upload MP3, WAV, AAC, or M4A</strong>
+            <div class="fine">Single file, up to 10MB. Waveform preview appears before analysis.</div>
+          </div>
+          <input id="fileInput" type="file" accept=".mp3,.wav,.aac,.m4a,audio/mpeg,audio/wav,audio/aac,audio/mp4,audio/x-m4a,audio/mp4a-latm">
+          <button id="analyzeBtn">Analyze Track</button>
+          <div id="message" class="fine">Waiting for audio.</div>
+          <div id="progressShell" class="progress-shell">
+            <div class="meta"><strong id="progressLabel">Processing</strong><span id="progressValue">0%</span></div>
+            <div class="bar"><div id="progressFill" class="fill"></div></div>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="meta"><div><strong id="fileName">No file selected</strong><span id="fileMeta">Load a short track to preview the waveform.</span></div><span class="eyebrow">Preview</span></div>
+          <canvas id="waveform" width="900" height="280"></canvas>
+          <audio id="sourcePreview" controls style="display:none"></audio>
+          <div class="trim-box">
+            <div class="meta"><div><strong>Detection Window</strong><span id="trimSummary">Choose the section of the song that should be analyzed.</span></div><span class="eyebrow">Trim</span></div>
+            <div class="trim-metrics">
+              <div><span class="muted">Start</span><strong id="trimStartValue">0.0s</strong></div>
+              <div><span class="muted">End</span><strong id="trimEndValue">0.0s</strong></div>
+            </div>
+            <div class="trim-note">Drag the left or right edge to trim. Playback follows the selected window. Drag the center band to move the whole range.</div>
+            <div class="trim-ruler"><strong>0.0s</strong><span id="trimMidpoint">0.0s</span><strong id="trimDurationLabel">0.0s</strong></div>
+            <div id="trimSlider" class="trim-slider" aria-label="Detection trim window">
+              <div class="trim-track"></div>
+              <div id="trimSelection" class="trim-selection" role="slider" aria-label="Trim range"></div>
+              <button id="trimStartHandle" class="trim-handle" type="button" aria-label="Trim start" disabled></button>
+              <button id="trimEndHandle" class="trim-handle" type="button" aria-label="Trim end" disabled></button>
+            </div>
+            <div class="trim-readout" style="margin-top:12px"><strong id="trimWindow">0.0s - 0.0s</strong><span id="trimLength" class="muted">Selected length: 0.0s</span></div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="panel report" style="margin-top:18px">
+      <div class="eyebrow">Session Readout</div>
+      <div class="kpis" id="kpis">
+        <div class="kpi"><div class="kpi-label">Status</div><strong id="statusKpi">Idle</strong></div>
+        <div class="kpi"><div class="kpi-label">Detected BPM</div><strong id="bpmKpi">--</strong></div>
+        <div class="kpi"><div class="kpi-label">Genre Guess</div><strong id="genreKpi">--</strong></div>
+      </div>
+      <div id="results" class="results"></div>
+      <div id="fullReport"></div>
+    </section>
+  </main>
+
+  <script>
+    const state = {
+      file: null,
+      jobId: null,
+      poller: null,
+      player: new Audio(),
+      activeButton: null,
+      activeStemUrl: '',
+      activeFetchController: null,
+      playRequestId: 0,
+      stemCache: {},
+      buffer: null,
+      duration: 0,
+      trimStart: 0,
+      trimEnd: 0,
+      dragging: null,
+      dragOffset: 0,
+      previewUrl: null,
+      trimBounds: null,
+      waveformLayer: null,
+      waveformFrame: 0,
+      previewFrame: 0,
+    };
+    const fileInput = document.getElementById('fileInput');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const message = document.getElementById('message');
+    const progressShell = document.getElementById('progressShell');
+    const progressFill = document.getElementById('progressFill');
+    const progressValue = document.getElementById('progressValue');
+    const progressLabel = document.getElementById('progressLabel');
+    const fileName = document.getElementById('fileName');
+    const fileMeta = document.getElementById('fileMeta');
+    const waveform = document.getElementById('waveform');
+    const sourcePreview = document.getElementById('sourcePreview');
+    const results = document.getElementById('results');
+    const fullReport = document.getElementById('fullReport');
+    const statusKpi = document.getElementById('statusKpi');
+    const bpmKpi = document.getElementById('bpmKpi');
+    const genreKpi = document.getElementById('genreKpi');
+    const trimSlider = document.getElementById('trimSlider');
+    const trimSelection = document.getElementById('trimSelection');
+    const trimStartHandle = document.getElementById('trimStartHandle');
+    const trimEndHandle = document.getElementById('trimEndHandle');
+    const trimStartValue = document.getElementById('trimStartValue');
+    const trimEndValue = document.getElementById('trimEndValue');
+    const trimSummary = document.getElementById('trimSummary');
+    const trimWindow = document.getElementById('trimWindow');
+    const trimLength = document.getElementById('trimLength');
+    const trimMidpoint = document.getElementById('trimMidpoint');
+    const trimDurationLabel = document.getElementById('trimDurationLabel');
+    state.player.preload = 'auto';
+
+    fileInput.addEventListener('change', async (event) => {
+      state.file = event.target.files[0];
+      if (!state.file) return;
+      if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
+      resetStemPlayback();
+      clearStemCache();
+      stopPreviewMonitor();
+      sourcePreview.pause();
+      resetTrimState();
+      fileName.textContent = state.file.name;
+      fileMeta.textContent = `${(state.file.size / 1024 / 1024).toFixed(2)} MB`;
+      clearInterval(state.poller);
+      state.previewUrl = URL.createObjectURL(state.file);
+      sourcePreview.src = state.previewUrl;
+      sourcePreview.style.display = 'block';
+      try {
+        await loadPreview(state.file);
+        setMessage(state.buffer ? 'Waveform ready. Preview now follows the selected trim window.' : 'Preview loaded. Browser waveform decode is unavailable for this file, but trim playback still follows your selection.');
+      } catch (error) {
+        setMessage(error.message || 'Audio preview is unavailable, but you can still analyze the file.', true);
+      }
+    });
+    trimStartHandle.addEventListener('pointerdown', (event) => beginTrimDrag(event, 'start'));
+    trimEndHandle.addEventListener('pointerdown', (event) => beginTrimDrag(event, 'end'));
+    trimSelection.addEventListener('pointerdown', (event) => beginTrimDrag(event, 'selection'));
+    trimSlider.addEventListener('pointerdown', trimSliderPointerDown);
+    trimStartHandle.addEventListener('keydown', (event) => trimHandleKeydown(event, 'start'));
+    trimEndHandle.addEventListener('keydown', (event) => trimHandleKeydown(event, 'end'));
+    window.addEventListener('pointermove', onTrimPointerMove);
+    window.addEventListener('pointerup', endTrimDrag);
+    window.addEventListener('pointercancel', endTrimDrag);
+    sourcePreview.addEventListener('loadedmetadata', () => syncPreviewToTrim(true));
+    sourcePreview.addEventListener('play', handlePreviewPlay);
+    sourcePreview.addEventListener('pause', stopPreviewMonitor);
+    sourcePreview.addEventListener('ended', handlePreviewEnded);
+    sourcePreview.addEventListener('seeking', handlePreviewSeeking);
+    state.player.addEventListener('loadstart', handleStemLoadStart);
+    state.player.addEventListener('waiting', handleStemWaiting);
+    state.player.addEventListener('canplay', handleStemCanPlay);
+    state.player.addEventListener('playing', handleStemPlaying);
+    state.player.addEventListener('pause', handleStemPause);
+    state.player.addEventListener('ended', handleStemEnded);
+    state.player.addEventListener('error', handleStemError);
+
+    analyzeBtn.addEventListener('click', async () => {
+      if (!state.file) return setMessage('Choose an MP3, WAV, AAC, or M4A file first.', true);
+      analyzeBtn.disabled = true;
+      resetStemPlayback();
+      clearStemCache();
+      setMessage('Uploading audio...');
+      statusKpi.textContent = 'Queued';
+      results.innerHTML = '';
+      fullReport.innerHTML = '';
+      const formData = new FormData();
+      formData.append('file', state.file);
+      formData.append('trim_start', state.trimStart);
+      if (state.duration) formData.append('trim_end', state.trimEnd);
+      try {
+        const response = await fetch('/upload', { method: 'POST', body: formData });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || 'Upload failed.');
+        state.jobId = data.job_id;
+        beginPolling();
+      } catch (error) {
+        analyzeBtn.disabled = false;
+        setMessage(error.message, true);
+      }
+    });
+
+    function beginPolling() {
+      clearInterval(state.poller);
+      progressShell.classList.add('active');
+      updateProgress(5, 'Upload received');
+      state.poller = setInterval(checkStatus, 2000);
+      checkStatus();
+    }
+
+    async function checkStatus() {
+      const response = await fetch(`/status/${state.jobId}`);
+      const data = await response.json();
+      updateProgress(data.progress, data.message);
+      statusKpi.textContent = data.status;
+      if (data.status === 'done') {
+        clearInterval(state.poller);
+        analyzeBtn.disabled = false;
+        setMessage('Analysis complete.');
+        loadResults();
+      }
+      if (data.status === 'error') {
+        clearInterval(state.poller);
+        analyzeBtn.disabled = false;
+        setMessage(data.message || 'Processing failed.', true);
+      }
+    }
+
+    async function loadResults() {
+      const response = await fetch(`/results/${state.jobId}`);
+      const data = await response.json();
+      bpmKpi.textContent = data.track_features?.bpm || '--';
+      genreKpi.textContent = data.full_report.genre_guess || '--';
+      const selection = data.selection ? `<li><strong>Analyzed section:</strong> ${formatSeconds(data.selection.start_seconds)} - ${formatSeconds(data.selection.end_seconds)} (${formatSeconds(data.selection.duration_seconds)})</li>` : '';
+      resetStemPlayback();
+      clearStemCache();
+      results.innerHTML = Object.entries(data.stems).map(([stem, info]) => renderStemCard(stem, info)).join('');
+      fullReport.innerHTML = `
+        <section class="card" style="margin-top:18px">
+          <div class="eyebrow">Full Production Report</div>
+          <h2 style="margin-top:8px">${data.full_report.production_style}</h2>
+          <ul class="report-list">
+            ${selection}
+            <li><strong>Genre guess:</strong> ${data.full_report.genre_guess}</li>
+            <li><strong>Notable techniques:</strong> ${data.full_report.notable_techniques.join(', ')}</li>
+            <li><strong>Reference artists:</strong> ${data.full_report.similar_artists.join(', ')}</li>
+          </ul>
+        </section>`;
+      document.querySelectorAll('.play-btn').forEach((button) => {
+        button.addEventListener('click', () => toggleStem(button));
+        button.addEventListener('mouseenter', () => warmStem(button.dataset.url));
+        button.addEventListener('focus', () => warmStem(button.dataset.url));
+      });
+    }
+
+    function renderStemCard(stem, info) {
+      const range = `${info.features.frequency_range.low_hz}-${info.features.frequency_range.high_hz}Hz`;
+      const energy = capitalize(info.features.energy_level);
+      const bars = buildStemBars(stem, info.features);
+      const instruments = info.analysis.detected_instruments.map((item) => `<span class="chip">${item}</span>`).join('');
+      const fx = info.analysis.likely_fx.map((item) => `<span class="chip">${item}</span>`).join('');
+      return `
+        <article class="card stem-card" data-state="idle" data-stem="${stem}">
+          <div class="stem-top">
+            <div class="stem-ident">
+              <div class="icon">${info.icon}</div>
+              <div class="stem-copy">
+                <div class="stem-title-row">
+                  <h3>${stem}</h3>
+                  <span class="confidence-pill ${info.analysis.confidence}">${info.analysis.confidence} confidence</span>
+                </div>
+                <div class="stem-status">
+                  <span class="status-dot"></span>
+                  <span class="stem-status-copy">Ready to preview</span>
+                </div>
+              </div>
+            </div>
+            <button class="ghost transport play-btn" data-url="${info.preview_url}" data-state="idle">
+              <span class="transport-orb"></span>
+              <span class="transport-label">Play stem</span>
+            </button>
+          </div>
+          <div class="stem-visual">
+            <div class="visual-grid">${bars}</div>
+            <div class="visual-footer">
+              <div><span class="muted">Detected key</span><strong>${info.features.key}</strong></div>
+              <div><span class="muted">Energy profile</span><strong>${energy}</strong></div>
+            </div>
+          </div>
+          <div class="stat-grid">
+            <div class="metric"><span>BPM</span><strong>${info.features.bpm}</strong></div>
+            <div class="metric"><span>Duration</span><strong>${formatSeconds(info.features.duration_seconds)}</strong></div>
+            <div class="metric"><span>Energy</span><strong>${energy}</strong></div>
+            <div class="metric"><span>Key</span><strong>${info.features.key}</strong></div>
+            <div class="metric metric-wide"><span>Frequency range</span><strong>${range}</strong></div>
+          </div>
+          <div>
+            <div class="section-label">Detected instruments</div>
+            <div class="chips" style="margin-top:10px">${instruments}</div>
+          </div>
+          <div>
+            <div class="section-label">Likely FX</div>
+            <div class="chips" style="margin-top:10px">${fx}</div>
+          </div>
+          <div class="card-actions">
+            <a class="ghost download-link" href="${info.download_url}" download>Download stem</a>
+          </div>
+        </article>`;
+    }
+
+    function buildStemBars(stem, features) {
+      const seed = [...stem].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+      const base = clamp((features.rms_energy || 0) * 600, 18, 82);
+      return Array.from({ length: 18 }, (_, index) => {
+        const wave = Math.sin((index + 1 + seed / 7) * 0.82) * 12;
+        const tilt = (features.spectral_centroid || 0) / 450;
+        const height = clamp(base + wave + tilt + (index % 4) * 4, 16, 94);
+        return `<span style="--bar:${height}%;--delay:${index * 0.06}s"></span>`;
+      }).join('');
+    }
+
+    function defaultStemCopy(status) {
+      return {
+        idle: 'Ready to preview',
+        loading: 'Loading stem preview...',
+        playing: 'Stem preview is playing',
+        paused: 'Preview paused',
+        error: 'Stem preview failed',
+      }[status];
+    }
+
+    function setStemState(button, status, label = '') {
+      if (!button) return;
+      const card = button.closest('.stem-card');
+      const text = label || defaultStemCopy(status);
+      button.dataset.state = status;
+      card.dataset.state = status;
+      const copy = card.querySelector('.stem-status-copy');
+      const transport = button.querySelector('.transport-label');
+      copy.textContent = text;
+      transport.textContent = {
+        idle: 'Play stem',
+        loading: 'Loading',
+        playing: 'Pause',
+        paused: 'Resume',
+        error: 'Retry',
+      }[status];
+    }
+
+    async function warmStem(url) {
+      if (!url || state.stemCache[url]?.objectUrl || state.stemCache[url]?.promise) return;
+      try {
+        await ensureStemMedia(url, false);
+      } catch (error) {
+        return;
+      }
+    }
+
+    async function ensureStemMedia(url, usePrimaryController = true) {
+      if (state.stemCache[url]?.objectUrl) return state.stemCache[url].objectUrl;
+      if (state.stemCache[url]?.promise) return state.stemCache[url].promise;
+      const controller = new AbortController();
+      if (usePrimaryController) {
+        if (state.activeFetchController) state.activeFetchController.abort();
+        state.activeFetchController = controller;
+      }
+      const promise = fetch(url, { signal: controller.signal })
+        .then((response) => {
+          if (!response.ok) throw new Error('Stem preview is not available.');
+          return response.blob();
+        })
+        .then((blob) => {
+          const objectUrl = URL.createObjectURL(blob);
+          state.stemCache[url] = { objectUrl };
+          return objectUrl;
+        })
+        .catch((error) => {
+          delete state.stemCache[url];
+          throw error;
+        })
+        .finally(() => {
+          if (usePrimaryController && state.activeFetchController === controller) state.activeFetchController = null;
+        });
+      state.stemCache[url] = { promise, controller };
+      return promise;
+    }
+
+    async function toggleStem(button) {
+      const url = button.dataset.url;
+      const sameButton = state.activeButton === button;
+      if (sameButton && button.dataset.state === 'loading') return;
+      if (sameButton && !state.player.paused) {
+        state.player.pause();
+        return;
+      }
+      if (sameButton && state.player.paused && state.player.src) {
+        setStemState(button, 'loading', 'Resuming stem preview...');
+        try {
+          await state.player.play();
+        } catch (error) {
+          setStemState(button, 'error', 'Preview could not resume');
+        }
+        return;
+      }
+
+      resetStemPlayback({ clearCache: false, keepCardState: false });
+      state.activeButton = button;
+      state.activeStemUrl = url;
+      const requestId = ++state.playRequestId;
+      setStemState(button, 'loading', 'Fetching stem preview...');
+      try {
+        const mediaUrl = await ensureStemMedia(url, true);
+        if (requestId !== state.playRequestId || state.activeButton !== button) return;
+        if (state.player.src !== mediaUrl) state.player.src = mediaUrl;
+        state.player.currentTime = 0;
+        await state.player.play();
+      } catch (error) {
+        if (error.name === 'AbortError') return;
+        setStemState(button, 'error', error.message || 'Stem preview failed to load');
+        state.activeButton = null;
+        state.activeStemUrl = '';
+      }
+    }
+
+    function handleStemLoadStart() {
+      if (state.activeButton) setStemState(state.activeButton, 'loading', 'Preparing stem preview...');
+    }
+
+    function handleStemWaiting() {
+      if (state.activeButton) setStemState(state.activeButton, 'loading', 'Buffering stem preview...');
+    }
+
+    function handleStemCanPlay() {
+      if (state.activeButton && state.player.paused) setStemState(state.activeButton, 'paused', 'Stem preview is ready');
+    }
+
+    function handleStemPlaying() {
+      if (state.activeButton) setStemState(state.activeButton, 'playing');
+    }
+
+    function handleStemPause() {
+      if (state.activeButton && !state.player.ended) setStemState(state.activeButton, 'paused');
+    }
+
+    function handleStemEnded() {
+      if (!state.activeButton) return;
+      state.player.currentTime = 0;
+      setStemState(state.activeButton, 'paused', 'Preview complete');
+    }
+
+    function handleStemError() {
+      if (state.activeButton) setStemState(state.activeButton, 'error', 'Stem preview failed to load');
+    }
+
+    function resetStemPlayback({ clearCache = false, keepCardState = true } = {}) {
+      ++state.playRequestId;
+      if (state.activeFetchController) {
+        state.activeFetchController.abort();
+        state.activeFetchController = null;
+      }
+      if (state.activeButton && !keepCardState) setStemState(state.activeButton, 'idle');
+      state.activeButton = null;
+      state.activeStemUrl = '';
+      state.player.pause();
+      state.player.removeAttribute('src');
+      state.player.load();
+      if (clearCache) clearStemCache();
+    }
+
+    function clearStemCache() {
+      Object.values(state.stemCache).forEach((entry) => {
+        if (entry.controller) entry.controller.abort();
+        if (entry.objectUrl) URL.revokeObjectURL(entry.objectUrl);
+      });
+      state.stemCache = {};
+    }
+
+    function updateProgress(value, label) {
+      progressFill.style.width = `${value}%`;
+      progressValue.textContent = `${value}%`;
+      progressLabel.textContent = label;
+    }
+
+    function setMessage(text, isError = false) {
+      message.textContent = text;
+      message.className = isError ? 'status-error' : 'fine';
+    }
+
+    async function loadPreview(file) {
+      state.buffer = null;
+      state.duration = 0;
+      state.waveformLayer = null;
+      const duration = await loadDuration(file);
+      if (duration) state.duration = Number(duration.toFixed(1));
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        const audioContext = new AudioCtx();
+        try {
+          const raw = await file.arrayBuffer();
+          state.buffer = await audioContext.decodeAudioData(raw.slice(0));
+          state.duration = Number(state.buffer.duration.toFixed(1)) || state.duration;
+        } catch (error) {
+          state.buffer = null;
+        } finally {
+          await audioContext.close();
+        }
+      }
+      if (!state.duration) throw new Error('This browser cannot read the selected audio preview. You can still upload supported files, but trimming needs readable metadata.');
+      if (state.buffer) prepareWaveformLayer();
+      state.trimStart = 0;
+      state.trimEnd = state.duration;
+      trimStartHandle.disabled = false;
+      trimEndHandle.disabled = false;
+      renderTrimState({ syncPreview: true, forcePreviewSync: true });
+    }
+
+    function loadDuration(file) {
+      return new Promise((resolve) => {
+        const probe = document.createElement('audio');
+        const url = URL.createObjectURL(file);
+        probe.preload = 'metadata';
+        probe.src = url;
+        probe.onloadedmetadata = () => {
+          const value = Number.isFinite(probe.duration) ? probe.duration : 0;
+          URL.revokeObjectURL(url);
+          resolve(value);
+        };
+        probe.onerror = () => {
+          URL.revokeObjectURL(url);
+          resolve(0);
+        };
+      });
+    }
+
+    function resetTrimState() {
+      state.buffer = null;
+      state.duration = 0;
+      state.trimStart = 0;
+      state.trimEnd = 0;
+      state.dragging = null;
+      state.dragOffset = 0;
+      state.trimBounds = null;
+      state.waveformLayer = null;
+      if (state.waveformFrame) cancelAnimationFrame(state.waveformFrame);
+      state.waveformFrame = 0;
+      trimStartHandle.disabled = true;
+      trimEndHandle.disabled = true;
+      updateTrimUI();
+      scheduleWaveformDraw();
+    }
+
+    function trimSliderPointerDown(event) {
+      if (!state.duration || event.target.classList.contains('trim-handle') || event.target === trimSelection) return;
+      const point = valueFromPointer(event.clientX);
+      const side = Math.abs(point - state.trimStart) <= Math.abs(point - state.trimEnd) ? 'start' : 'end';
+      beginTrimDrag(event, side);
+    }
+
+    function beginTrimDrag(event, side) {
+      if (!state.duration) return;
+      event.preventDefault();
+      state.dragging = side;
+      state.trimBounds = trimSlider.getBoundingClientRect();
+      if (event.target.setPointerCapture && event.pointerId !== undefined) event.target.setPointerCapture(event.pointerId);
+      if (side === 'selection') {
+        state.dragOffset = valueFromPointer(event.clientX) - state.trimStart;
+        trimSelection.classList.add('dragging');
+      }
+      updateTrimFromPointer(event.clientX, side);
+    }
+
+    function onTrimPointerMove(event) {
+      if (!state.dragging) return;
+      updateTrimFromPointer(event.clientX, state.dragging);
+    }
+
+    function endTrimDrag() {
+      if (!state.dragging) return;
+      trimSelection.classList.remove('dragging');
+      state.dragging = null;
+      state.dragOffset = 0;
+      state.trimBounds = null;
+      syncPreviewToTrim(sourcePreview.paused);
+    }
+
+    function updateTrimFromPointer(clientX, side) {
+      const minGap = state.duration > 0.1 ? 0.1 : state.duration;
+      const point = valueFromPointer(clientX);
+      if (side === 'selection') {
+        const width = state.trimEnd - state.trimStart;
+        const start = clamp(point - state.dragOffset, 0, Math.max(0, state.duration - width));
+        state.trimStart = start;
+        state.trimEnd = start + width;
+      } else if (side === 'start') {
+        state.trimStart = clamp(point, 0, Math.max(0, state.trimEnd - minGap));
+      } else {
+        state.trimEnd = clamp(point, Math.min(state.duration, state.trimStart + minGap), state.duration);
+      }
+      renderTrimState({ syncPreview: !sourcePreview.paused });
+    }
+
+    function updateTrimUI() {
+      const startPct = state.duration ? (state.trimStart / state.duration) * 100 : 0;
+      const endPct = state.duration ? (state.trimEnd / state.duration) * 100 : 0;
+      trimStartValue.textContent = formatSeconds(state.trimStart);
+      trimEndValue.textContent = formatSeconds(state.trimEnd);
+      trimWindow.textContent = `${formatSeconds(state.trimStart)} - ${formatSeconds(state.trimEnd)}`;
+      trimLength.textContent = `Selected length: ${formatSeconds(Math.max(0, state.trimEnd - state.trimStart))}`;
+      trimSummary.textContent = state.duration ? `Detection will use ${formatSeconds(state.trimEnd - state.trimStart)} from a ${formatSeconds(state.duration)} file.` : 'Choose the section of the song that should be analyzed.';
+      trimMidpoint.textContent = formatSeconds(state.duration / 2);
+      trimDurationLabel.textContent = formatSeconds(state.duration);
+      trimSelection.style.left = `${startPct}%`;
+      trimSelection.style.width = `${Math.max(0, endPct - startPct)}%`;
+      trimStartHandle.style.left = `${startPct}%`;
+      trimEndHandle.style.left = `${endPct}%`;
+      trimSelection.setAttribute('aria-valuemin', state.trimStart.toFixed(1));
+      trimSelection.setAttribute('aria-valuemax', state.trimEnd.toFixed(1));
+    }
+
+    function renderTrimState({ syncPreview = true, forcePreviewSync = false } = {}) {
+      updateTrimUI();
+      if (syncPreview) syncPreviewToTrim(forcePreviewSync);
+      scheduleWaveformDraw();
+    }
+
+    function scheduleWaveformDraw() {
+      if (state.waveformFrame) return;
+      state.waveformFrame = requestAnimationFrame(() => {
+        state.waveformFrame = 0;
+        drawWaveform();
+      });
+    }
+
+    function prepareWaveformLayer() {
+      if (!state.buffer) {
+        state.waveformLayer = null;
+        return;
+      }
+      const peaks = buildWaveformPeaks(state.buffer.getChannelData(0), waveform.width);
+      const layer = document.createElement('canvas');
+      layer.width = waveform.width;
+      layer.height = waveform.height;
+      const ctx = layer.getContext('2d');
+      const amp = layer.height / 2;
+      ctx.strokeStyle = '#63f5df';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < peaks.length; i++) {
+        ctx.moveTo(i, (1 + peaks[i].min) * amp);
+        ctx.lineTo(i, (1 + peaks[i].max) * amp);
+      }
+      ctx.stroke();
+      state.waveformLayer = layer;
+    }
+
+    function buildWaveformPeaks(data, width) {
+      const peaks = new Array(width);
+      const step = Math.max(1, Math.ceil(data.length / width));
+      for (let i = 0; i < width; i++) {
+        const start = i * step;
+        const end = Math.min(start + step, data.length);
+        let min = 1;
+        let max = -1;
+        if (start >= data.length) {
+          peaks[i] = { min: 0, max: 0 };
+          continue;
+        }
+        for (let index = start; index < end; index++) {
+          const sample = data[index];
+          if (sample < min) min = sample;
+          if (sample > max) max = sample;
+        }
+        peaks[i] = { min, max };
+      }
+      return peaks;
+    }
+
+    function drawWaveform() {
+      const ctx = waveform.getContext('2d');
+      ctx.clearRect(0, 0, waveform.width, waveform.height);
+      ctx.fillStyle = '#08111f';
+      ctx.fillRect(0, 0, waveform.width, waveform.height);
+      if (!state.waveformLayer) {
+        drawPlaceholderWaveform(ctx);
+        return;
+      }
+      const startX = state.duration ? (state.trimStart / state.duration) * waveform.width : 0;
+      const endX = state.duration ? (state.trimEnd / state.duration) * waveform.width : waveform.width;
+      ctx.fillStyle = 'rgba(99,245,223,.1)';
+      ctx.fillRect(startX, 0, Math.max(2, endX - startX), waveform.height);
+      ctx.fillStyle = 'rgba(5,9,20,.72)';
+      ctx.fillRect(0, 0, startX, waveform.height);
+      ctx.fillRect(endX, 0, waveform.width - endX, waveform.height);
+      ctx.drawImage(state.waveformLayer, 0, 0);
+      ctx.strokeStyle = '#ffbb63';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(startX, 3, Math.max(2, endX - startX), waveform.height - 6);
+    }
+
+    function drawPlaceholderWaveform(ctx) {
+      ctx.strokeStyle = 'rgba(99,245,223,.35)';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 52; i++) {
+        const x = 18 + i * 16;
+        const h = 24 + (i % 7) * 9;
+        ctx.beginPath();
+        ctx.moveTo(x, (waveform.height - h) / 2);
+        ctx.lineTo(x, (waveform.height + h) / 2);
+        ctx.stroke();
+      }
+    }
+
+    function trimHandleKeydown(event, side) {
+      if (!state.duration) return;
+      const steps = { ArrowLeft: -0.1, ArrowRight: 0.1, PageDown: -1, PageUp: 1 };
+      if (!(event.key in steps) && !['Home', 'End'].includes(event.key)) return;
+      event.preventDefault();
+      let next = side === 'start' ? state.trimStart : state.trimEnd;
+      if (event.key === 'Home') next = 0;
+      if (event.key === 'End') next = state.duration;
+      if (event.key in steps) next += steps[event.key];
+      updateTrimValue(side, next);
+    }
+
+    function updateTrimValue(side, value) {
+      const minGap = state.duration > 0.1 ? 0.1 : state.duration;
+      if (side === 'start') {
+        state.trimStart = clamp(value, 0, Math.max(0, state.trimEnd - minGap));
+      } else {
+        state.trimEnd = clamp(value, Math.min(state.duration, state.trimStart + minGap), state.duration);
+      }
+      renderTrimState({ syncPreview: true, forcePreviewSync: sourcePreview.paused });
+    }
+
+    function valueFromPointer(clientX) {
+      const rect = state.trimBounds || trimSlider.getBoundingClientRect();
+      const ratio = clamp((clientX - rect.left) / rect.width, 0, 1);
+      return ratio * state.duration;
+    }
+
+    function syncPreviewToTrim(forcePreviewSync = false) {
+      if (!state.duration || !sourcePreview.src || sourcePreview.readyState < 1) return;
+      const currentTime = Number.isFinite(sourcePreview.currentTime) ? sourcePreview.currentTime : 0;
+      const shouldSnapToStart = forcePreviewSync || sourcePreview.paused || currentTime < state.trimStart || currentTime >= state.trimEnd;
+      if (!shouldSnapToStart) return;
+      setPreviewTime(state.trimStart);
+    }
+
+    function setPreviewTime(time) {
+      if (!sourcePreview.src || sourcePreview.readyState < 1) return;
+      const target = clamp(time, 0, state.duration || time);
+      if (Math.abs(sourcePreview.currentTime - target) < 0.02) return;
+      try {
+        sourcePreview.currentTime = target;
+      } catch (error) {
+        return;
+      }
+    }
+
+    function handlePreviewPlay() {
+      syncPreviewToTrim(sourcePreview.currentTime < state.trimStart || sourcePreview.currentTime >= state.trimEnd);
+      startPreviewMonitor();
+    }
+
+    function handlePreviewEnded() {
+      stopPreviewMonitor();
+      syncPreviewToTrim(true);
+    }
+
+    function handlePreviewSeeking() {
+      if (!state.duration) return;
+      if (sourcePreview.currentTime < state.trimStart) {
+        setPreviewTime(state.trimStart);
+        return;
+      }
+      if (sourcePreview.currentTime > state.trimEnd) setPreviewTime(state.trimEnd);
+    }
+
+    function startPreviewMonitor() {
+      stopPreviewMonitor();
+      const tick = () => {
+        if (sourcePreview.paused || !state.duration) {
+          state.previewFrame = 0;
+          return;
+        }
+        if (sourcePreview.currentTime < state.trimStart) setPreviewTime(state.trimStart);
+        if (sourcePreview.currentTime >= state.trimEnd) {
+          sourcePreview.pause();
+          setPreviewTime(state.trimStart);
+          state.previewFrame = 0;
+          return;
+        }
+        state.previewFrame = requestAnimationFrame(tick);
+      };
+      state.previewFrame = requestAnimationFrame(tick);
+    }
+
+    function stopPreviewMonitor() {
+      if (!state.previewFrame) return;
+      cancelAnimationFrame(state.previewFrame);
+      state.previewFrame = 0;
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(Math.max(value, min), max);
+    }
+
+    function capitalize(value) {
+      const text = String(value || '');
+      return text ? text[0].toUpperCase() + text.slice(1) : text;
+    }
+
+    function formatSeconds(value) {
+      return `${Number(value || 0).toFixed(1)}s`;
+    }
+
+    scheduleWaveformDraw();
+  </script>
+</body>
+</html>
