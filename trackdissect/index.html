@@ -1412,6 +1412,9 @@
           <button id="analyzeBtn">Analyze Track</button>
           <div id="message" class="fine">Waiting for audio.</div>
           <div id="progressShell" class="progress-shell" data-status="idle">
+            <div id="reAnalyzeOverlay" class="re-analyzing-overlay">
+              <div class="fine" style="font-weight: 700; color: var(--accent);">Re-analyzing section...</div>
+            </div>
             <div class="process-head">
               <div>
                 <div class="process-kicker"><span class="process-pulse"></span><span id="processStage"
@@ -1558,6 +1561,8 @@
       processClock: 0,
       processBaseTime: 0,
       loopPreview: false,
+      lastAnalyzedStart: undefined,
+      lastAnalyzedEnd: undefined,
     };
     const PROCESS_STAGES = [
       { key: 'prepare', label: 'Prepare clip', hint: 'Render the selected window.' },
@@ -1611,6 +1616,11 @@
     const trimEndValue = document.getElementById('trimEndValue');
     const trimSummary = document.getElementById('trimSummary');
     const trimLength = document.getElementById('trimLength');
+    const reAnalyzeOverlay = document.getElementById('reAnalyzeOverlay');
+    const nextStepsArea = document.getElementById('nextStepsArea');
+    const scrollToTrimBtn = document.getElementById('scrollToTrimBtn');
+    const startNewProjectBtn = document.getElementById('startNewProjectBtn');
+    const resultsSection = document.getElementById('resultsSection');
     state.player.preload = 'auto';
 
     fileInput.addEventListener('change', async (event) => {
@@ -1688,10 +1698,20 @@
     analyzeBtn.addEventListener('click', async () => {
       if (!state.file) return setMessage('Choose an MP3, WAV, AAC, or M4A file first.', true);
       analyzeBtn.disabled = true;
+
+      const isReAnalysis = progressShell.dataset.status === 'done';
+
+      if (isReAnalysis) {
+        reAnalyzeOverlay.classList.add('active');
+        progressShell.dataset.status = 'processing';
+      } else {
+        progressShell.classList.add('active');
+        progressShell.dataset.status = 'processing';
+      }
+
       resetStemPlayback();
-      clearStemCache();
-      resetProcessingUI();
-      setMessage('Uploading audio...');
+      nextStepsArea.classList.remove('active');
+      setMessage(isReAnalysis ? 'Re-analyzing section...' : 'Uploading audio...');
       statusKpi.textContent = 'Queued';
       prioritySection.style.display = 'none';
       secondarySection.style.display = 'none';
@@ -1773,7 +1793,13 @@
           analyzeBtn.disabled = false;
           setMessage('Analysis complete.');
           stopProcessClock();
+          reAnalyzeOverlay.classList.remove('active');
+          nextStepsArea.classList.add('active');
+          state.lastAnalyzedStart = state.trimStart;
+          state.lastAnalyzedEnd = state.trimEnd;
+          scheduleWaveformDraw();
           await loadResults();
+          resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         if (data.status === 'error') {
           clearInterval(state.poller);
@@ -1785,6 +1811,7 @@
       } catch (error) {
         clearInterval(state.poller);
         analyzeBtn.disabled = false;
+        reAnalyzeOverlay.classList.remove('active');
         progressShell.dataset.status = 'error';
         stopProcessClock();
         setMessage(error.message || 'Status polling failed.', true);
@@ -1869,7 +1896,8 @@
       const energy = capitalize(info.features.energy_level);
       const bars = buildStemBars(stem, info.features, isPrimary ? 16 : 14);
       const instruments = renderChipList(info.analysis.detected_instruments, isPrimary ? 3 : 2);
-      const fx = renderChipList(info.analysis.likely_fx, isPrimary ? 3 : 2);
+      const fxList = info.analysis.likely_fx.length ? info.analysis.likely_fx : (info.features.technical_fx || []);
+      const fx = renderChipList(fxList, isPrimary ? 3 : 2);
       const idleLabel = isPrimary ? 'Play stem' : 'Play';
       const transport = `
         <button class="ghost transport play-btn" data-url="${info.preview_url}" data-state="idle" data-idle-label="${idleLabel}">
@@ -2256,6 +2284,30 @@
       technicalSummary.textContent = `${lines.length} lines captured`;
       technicalLog.textContent = lines.slice(-50).map(l => `[${formatProcessOffset(l.at)}] ${l.text}`).join('\n');
       technicalLog.scrollTop = technicalLog.scrollHeight;
+    }
+
+    scrollToTrimBtn.addEventListener('click', () => {
+      document.querySelector('.upload').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    startNewProjectBtn.addEventListener('click', () => {
+      const hasResults = resultsSection.style.display !== 'none';
+      if (hasResults && !confirm('Are you sure you want to start a new project? Any unsaved analysis results will be lost.')) {
+        return;
+      }
+      resetAllState();
+    });
+
+    function resetAllState() {
+      state.file = null;
+      fileName.textContent = 'None';
+      fileMeta.textContent = '0 MB';
+      fileInput.value = '';
+      releasePreviewUrl();
+      resetProcessingUI();
+      resultsSection.style.display = 'none';
+      nextStepsArea.classList.remove('active');
+      setMessage('Waiting for audio.');
     }
 
     function resetProcessingUI() {
@@ -2678,14 +2730,20 @@
       ctx.strokeStyle = 'rgba(255,157,54,.96)';
       ctx.lineWidth = 2;
       ctx.strokeRect(startX, 3, Math.max(2, endX - startX), waveform.height - 6);
-      ctx.strokeStyle = 'rgba(255,243,226,.72)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(startX, 6);
-      ctx.lineTo(startX, waveform.height - 6);
-      ctx.moveTo(endX, 6);
-      ctx.lineTo(endX, waveform.height - 6);
       ctx.stroke();
+
+      // Highlight the portion that was actually analyzed
+      if (state.lastAnalyzedStart !== undefined && state.lastAnalyzedEnd !== undefined) {
+        const aStartX = (state.lastAnalyzedStart / state.duration) * waveform.width;
+        const aEndX = (state.lastAnalyzedEnd / state.duration) * waveform.width;
+        ctx.fillStyle = 'rgba(255, 138, 42, 0.45)';
+        ctx.fillRect(aStartX, 0, aEndX - aStartX, waveform.height);
+        // Add a subtle "Analyzed" label
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.font = '700 10px "IBM Plex Mono"';
+        ctx.fillText('ANALYZED', aStartX + 4, 14);
+      }
+
       drawPreviewMarker(ctx);
     }
 

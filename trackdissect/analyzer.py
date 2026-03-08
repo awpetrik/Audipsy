@@ -114,6 +114,15 @@ def analyze_audio(path: str | Path) -> dict:
     # Metadata extraction
     meta = _extract_metadata(path)
 
+    # Tech FX Heuristics
+    fx_guesses = []
+    if correlation < 0.35 and y_stereo.ndim > 1:
+        fx_guesses.append("Stereo Ambience")
+    if float(crest_factor) < 8.5:
+        fx_guesses.append("High Compression")
+    if float(sub_bass_energy) > 0.35:
+        fx_guesses.append("Sub Heavy")
+
     return {
         "metadata": meta,
         "bpm": round(_to_scalar(tempo), 1),
@@ -127,4 +136,5 @@ def analyze_audio(path: str | Path) -> dict:
         "energy_level": _energy_level(rms_scalar),
         "frequency_range": {"low_hz": low_hz, "high_hz": high_hz},
         "duration_seconds": round(len(y) / sr, 2),
+        "technical_fx": fx_guesses,
     }
