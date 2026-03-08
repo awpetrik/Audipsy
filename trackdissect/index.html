@@ -922,11 +922,13 @@
     }
 
     .results-primary {
-      grid-template-columns: repeat(2, minmax(0, 1fr))
+      grid-template-columns: 1fr;
+      gap: 20px
     }
 
     .results-secondary {
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr))
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px
     }
 
     .card {
@@ -1018,28 +1020,62 @@
       align-items: center;
       justify-self: start;
       max-width: 100%;
-      padding: 6px 10px;
+      padding: 6px 12px;
       border-radius: 999px;
       border: 1px solid rgba(255, 255, 255, .08);
-      font-size: .74rem;
+      font-size: .68rem;
       text-transform: uppercase;
-      letter-spacing: .08em
+      letter-spacing: .1em;
+      font-weight: 700;
+      cursor: help;
+      position: relative;
+    }
+
+    .confidence-pill::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f0a07;
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 0.65rem;
+      width: 180px;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s ease;
+      z-index: 100;
+      border: 1px solid var(--line-strong);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      text-transform: none;
+      letter-spacing: normal;
+      line-height: 1.4;
+    }
+
+    .confidence-pill:hover::after {
+      opacity: 1;
+      bottom: 135%;
     }
 
     .confidence-pill.high {
-      background: rgba(255, 138, 42, .08);
-      color: var(--accent-soft);
-      border-color: rgba(255, 138, 42, .18)
+      background: rgba(150, 255, 125, .1);
+      color: #96ff7d;
+      border-color: rgba(150, 255, 125, .3)
     }
 
     .confidence-pill.medium {
-      background: rgba(255, 210, 161, .06);
-      color: #ffe4c2
+      background: rgba(255, 214, 66, .08);
+      color: #ffd642;
+      border-color: rgba(255, 214, 66, .3)
     }
 
     .confidence-pill.low {
-      background: rgba(255, 110, 72, .08);
-      color: #ffc4b5
+      background: rgba(255, 157, 54, .1);
+      color: #ff9d36;
+      border-color: rgba(255, 157, 54, .4)
     }
 
     .icon {
@@ -1112,9 +1148,56 @@
     }
 
     .transport-row {
-      align-self: start;
-      justify-self: end;
-      min-width: 0
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-left: auto;
+    }
+
+    .card-action-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .download-btn-mini {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(255, 138, 42, 0.08);
+      border: 1px solid rgba(255, 138, 42, 0.15);
+      color: var(--accent-soft);
+      transition: all 0.2s;
+    }
+
+    .download-btn-mini:hover {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      transform: scale(1.05);
+    }
+
+    .download-all-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 24px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .download-all-btn:hover {
+      transform: scale(1.02) translateY(-2px);
+      box-shadow: 0 10px 25px rgba(255, 138, 42, 0.3);
     }
 
     .transport {
@@ -1199,21 +1282,43 @@
     }
 
     .stat-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr))
+      grid-template-columns: repeat(3, 1fr)
     }
 
     .metric {
       display: grid;
-      gap: 0
+      gap: 2px
+    }
+
+    .metric span {
+      font-size: .62rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted)
     }
 
     .metric strong {
-      font-size: 1.05rem;
-      line-height: 1.3
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1
+    }
+
+    .metric.priority strong {
+      font-size: 1.5rem;
+      color: var(--accent)
+    }
+
+    .metric.muted span,
+    .metric.muted strong {
+      color: rgba(255, 255, 255, .2);
+      font-weight: 400
     }
 
     .metric-wide {
-      grid-column: 1 / -1
+      grid-column: 1 / -1;
+      border-top: 1px solid rgba(255, 255, 255, .04);
+      padding-top: 8px;
     }
 
     .mini-stats {
@@ -1547,12 +1652,20 @@
         </div>
       </div>
 
-      <div class="report-head">
+      <div class="report-head" style="justify-content: space-between;">
         <div>
           <div class="eyebrow">Session Readout</div>
           <h2>Analysis Outputs</h2>
         </div>
-        <div class="muted">Vocals and instrumental stay primary. Supporting stems stay compact.</div>
+        <a id="downloadAllZip" href="#" class="download-all-btn" style="display: none;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Download All Stems (.zip)
+        </a>
       </div>
       <div class="kpis" id="kpis">
         <div class="kpi">
@@ -1670,6 +1783,7 @@
     const scrollToTrimBtn = document.getElementById('scrollToTrimBtn');
     const startNewProjectBtn = document.getElementById('startNewProjectBtn');
     const resultsSection = document.getElementById('resultsSection');
+    const downloadAllZip = document.getElementById('downloadAllZip');
     state.player.preload = 'auto';
 
     fileInput.addEventListener('change', async (event) => {
@@ -1876,6 +1990,8 @@
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || 'Unable to load results.');
       resultsSection.style.display = 'grid';
+      downloadAllZip.style.display = 'flex';
+      downloadAllZip.href = `/results/zip/${state.jobId}`;
       bpmKpi.textContent = data.track_features?.bpm || '--';
       genreKpi.textContent = capitalizeWords(data.full_report.genre_guess || '--');
       const selection = data.selection ? `<li><strong>Analyzed section:</strong> ${formatSeconds(data.selection.start_seconds)} - ${formatSeconds(data.selection.end_seconds)} (${formatSeconds(data.selection.duration_seconds)})</li>` : '';
@@ -1948,16 +2064,27 @@
       const label = capitalizeWords(stem.replace(/_/g, ' '));
       const range = `${info.features.frequency_range.low_hz}-${info.features.frequency_range.high_hz} Hz`;
       const energy = capitalize(info.features.energy_level);
-      const bars = buildStemBars(stem, info.features, isPrimary ? 16 : 14);
-      const instruments = renderChipList(info.analysis.detected_instruments, isPrimary ? 3 : 2);
-      const fxList = info.analysis.likely_fx.length ? info.analysis.likely_fx : (info.features.technical_fx || []);
       const fx = renderChipList(fxList, isPrimary ? 3 : 2);
-      const idleLabel = isPrimary ? 'Play stem' : 'Play';
+      const idleLabel = isPrimary ? 'Preview stem' : 'Play';
+      const bpm = (info.features.bpm && info.features.bpm > 0) ? info.features.bpm : '—';
+
+      const confidenceTooltips = {
+        high: "High reliability. Detection exceeds 85% accuracy threshold.",
+        medium: "Moderate reliability. Some characteristics may be subtle.",
+        low: "Low reliability. Complex audio layering may affect analysis accuracy."
+      };
+      const tooltip = confidenceTooltips[info.analysis.confidence] || "AI detection confidence level.";
+
       const transport = `
-        <button class="ghost transport play-btn" data-url="${info.preview_url}" data-state="idle" data-idle-label="${idleLabel}">
-          <span class="transport-orb"></span>
-          <span class="transport-label">${idleLabel}</span>
-        </button>`;
+        <div class="card-action-bar">
+          <button class="ghost transport play-btn" data-url="${info.preview_url}" data-state="idle" data-idle-label="${idleLabel}">
+            <span class="transport-orb"></span>
+            <span class="transport-label">${idleLabel}</span>
+          </button>
+          <a href="/media/${state.jobId}/${stem}" download class="ghost download-btn-mini" title="Download ${label}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </a>
+        </div>`;
       if (isPrimary) {
         return `
           <article class="card stem-card stem-card-primary" data-state="idle" data-stem="${stem}">
@@ -1968,7 +2095,7 @@
                   <h3>${label}</h3>
                 </div>
                 <div class="stem-meta-row">
-                  <span class="confidence-pill ${info.analysis.confidence}">${info.analysis.confidence} confidence</span>
+                  <span class="confidence-pill ${info.analysis.confidence}" data-tooltip="${tooltip}">${info.analysis.confidence} confidence</span>
                   <div class="stem-status">
                     <span class="status-dot"></span>
                     <span class="stem-status-copy">Ready to preview</span>
@@ -1985,11 +2112,11 @@
               </div>
             </div>
             <div class="stat-grid">
-              <div class="metric"><span>BPM</span><strong>${info.features.bpm}</strong></div>
+              <div class="metric priority"><span>BPM</span><strong>${bpm}</strong></div>
+              <div class="metric priority"><span>Key</span><strong>${info.features.key}</strong></div>
               <div class="metric"><span>Energy</span><strong>${energy}</strong></div>
-              <div class="metric"><span>Key</span><strong>${info.features.key}</strong></div>
-              <div class="metric"><span>Duration</span><strong>${formatSeconds(info.features.duration_seconds)}</strong></div>
-              <div class="metric metric-wide"><span>Frequency range</span><strong>${range}</strong></div>
+              <div class="metric muted"><span>Duration</span><strong>${formatSeconds(info.features.duration_seconds)}</strong></div>
+              <div class="metric-wide muted"><span>Frequency focus</span><strong>${range}</strong></div>
             </div>
             <div class="stem-section">
               <div class="section-label">Detected instruments</div>
@@ -1999,17 +2126,13 @@
               <div class="section-label">Likely FX</div>
               <div class="chips">${fx}</div>
             </div>
-            
             <div class="pro-mixing-logic">
               <div class="section-label">Mixing Logic</div>
-              <div class="mixing-grid">
-                <div class="mixing-item"><span>EQ:</span> ${info.analysis.mixing_logic.eq}</div>
-                <div class="mixing-item"><span>Dynamics:</span> ${info.analysis.mixing_logic.dynamics}</div>
-                <div class="mixing-item"><span>Space:</span> ${info.analysis.mixing_logic.space}</div>
+              <div class="mixing-grid" style="display: grid; gap: 8px;">
+                <div class="mixing-item" style="font-size: 0.85rem;"><span class="muted">EQ:</span> ${info.analysis.mixing_logic.eq}</div>
+                <div class="mixing-item" style="font-size: 0.85rem;"><span class="muted">Dynamics:</span> ${info.analysis.mixing_logic.dynamics}</div>
+                <div class="mixing-item" style="font-size: 0.85rem;"><span class="muted">Space:</span> ${info.analysis.mixing_logic.space}</div>
               </div>
-            </div>
-            <div class="card-actions">
-              <a class="ghost download-link" href="${info.download_url}" download>Download ${label}</a>
             </div>
           </article>`;
       }
@@ -2022,37 +2145,28 @@
                 <h3>${label}</h3>
               </div>
               <div class="stem-meta-row">
-                <span class="confidence-pill ${info.analysis.confidence}">${info.analysis.confidence} confidence</span>
-                <div class="stem-status">
-                  <span class="status-dot"></span>
-                  <span class="stem-status-copy">Ready to preview</span>
-                </div>
+                <span class="confidence-pill ${info.analysis.confidence}" data-tooltip="${tooltip}">${info.analysis.confidence} confidence</span>
               </div>
             </div>
-            <div class="transport-row" style="margin-left: auto;">${transport}</div>
+            <div class="transport-row">${transport}</div>
           </div>
-          <div class="mini-meta">
-            <div class="stem-inline-stat"><span>BPM</span><strong>${info.features.bpm}</strong></div>
-            <div class="stem-inline-stat"><span>Energy</span><strong>${energy}</strong></div>
-            <div class="stem-inline-stat"><span>Key</span><strong>${info.features.key}</strong></div>
+          
+          <div class="stat-grid" style="grid-template-columns: repeat(2, 1fr); padding: 0 16px;">
+            <div class="metric priority"><span>BPM</span><strong>${bpm}</strong></div>
+            <div class="metric priority"><span>Key</span><strong>${info.features.key}</strong></div>
           </div>
+
           <div class="stem-visual">
             <div class="visual-grid">${bars}</div>
             <div class="visual-footer">
-              <div><span>Range</span><strong>${range}</strong></div>
-              <div><span>Length</span><strong>${formatSeconds(info.features.duration_seconds)}</strong></div>
+              <div><span>Focus</span><strong>${range}</strong></div>
+              <div><span>Energy</span><strong>${energy}</strong></div>
             </div>
           </div>
-          <div class="stem-section">
-            <div class="section-label">Detected instruments</div>
+          
+          <div class="stem-section" style="padding: 0 16px 16px;">
             <div class="chips">${instruments}</div>
-          </div>
-          <div class="stem-section">
-            <div class="section-label">Likely FX</div>
             <div class="chips">${fx}</div>
-          </div>
-          <div class="card-actions">
-            <a class="ghost download-link" href="${info.download_url}" download>Download</a>
           </div>
         </article>`;
     }
@@ -2078,7 +2192,7 @@
 
     function renderChipList(items, maxVisible = 3) {
       const list = Array.isArray(items) ? items.filter(Boolean) : [];
-      if (!list.length) return '<span class="chip" data-tone="muted">No signal yet</span>';
+      if (!list.length) return '<span class="chip" data-tone="muted">—</span>';
       const visible = list.slice(0, maxVisible).map((item) => `<span class="chip">${item}</span>`).join('');
       const extra = list.length > maxVisible ? `<span class="chip" data-tone="muted">+${list.length - maxVisible} more</span>` : '';
       return `${visible}${extra}`;
@@ -2086,12 +2200,22 @@
 
     function buildStemBars(stem, features, count = 16) {
       const seed = [...stem].reduce((sum, char) => sum + char.charCodeAt(0), 0);
-      const base = clamp((features.rms_energy || 0) * 600, 18, 82);
+      const rms = features.rms_energy || 0;
+      const centroid = features.spectral_centroid || 0;
+      const spread = features.spectral_spread || 0;
+
+      const base = clamp(rms * 800, 20, 85);
+      const freqFactor = centroid / 4000; // Higher freq -> taller bars towards the right
+
       return Array.from({ length: count }, (_, index) => {
-        const wave = Math.sin((index + 1 + seed / 7) * 0.82) * 12;
-        const tilt = (features.spectral_centroid || 0) / 450;
-        const height = clamp(base + wave + tilt + (index % 4) * 4, 16, 94);
-        return `<span style="--bar:${height}%;--delay:${index * 0.06}s"></span>`;
+        const x = index / count;
+        // Frequency-based scaling: taller bars for higher freq stems
+        const spectralHeight = freqFactor * (15 + index * 2);
+        const wave = Math.sin((index + seed) * 0.5) * (5 + rms * 20);
+        const variation = (index % 3 === 0) ? spread / 100 : 0;
+
+        const height = clamp(base + spectralHeight + wave + variation, 15, 95);
+        return `<span style="--bar:${height}%;--delay:${index * 0.05}s"></span>`;
       }).join('');
     }
 

@@ -397,3 +397,38 @@ def media(job_id: str, stem: str):
         download_name = f"{orig_name}_{stem}.wav"
         
     return FileResponse(path, filename=download_name)
+
+
+@app.get("/results/zip/{job_id}")
+def download_zip(job_id: str):
+    import zipfile
+    job = _job(job_id)
+    if job["status"] != "done":
+        raise HTTPException(status_code=409, detail="Analysis results are not ready yet.")
+
+    zip_path = OUTPUT_DIR / f"{job_id}_stems.zip"
+    if not zip_path.exists():
+        results = job.get("results", {})
+        metadata = results.get("track_features", {}).get("metadata", {})
+        artist = metadata.get("artist")
+        title = metadata.get("title")
+        orig_stem = Path(job.get("filename", "track")).stem
+
+        with zipfile.ZipFile(zip_path, 'w') as zipf:
+            for stem, source in job.get("stem_files", {}).items():
+                source_path = Path(source)
+                if not source_path.exists():
+                    continue
+                
+                stem_label = stem.replace("_", " ").capitalize()
+                if artist and title:
+                    arcname = f"{artist} - {title} ({stem_label}).wav"
+                elif title:
+                    arcname = f"{title} ({stem_label}).wav"
+                else:
+                    arcname = f"{orig_stem}_{stem}.wav"
+                
+                zipf.write(source_path, arcname=arcname)
+    
+    orig_name = Path(job.get("filename", "track")).stem
+    return FileResponse(zip_path, filename=f"{orig_name}_Audipsy_Stems.zip")
