@@ -972,9 +972,10 @@
     .stem-meta-row {
       display: flex;
       align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      min-width: 0
+      gap: 12px;
+      flex-wrap: nowrap;
+      min-width: 0;
+      overflow: hidden;
     }
 
     .confidence-pill {
@@ -1029,9 +1030,9 @@
     }
 
     .stem-card-secondary .icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 16px
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
     }
 
     .stem-card-secondary .icon svg {
@@ -1044,9 +1045,16 @@
       align-items: center;
       gap: 8px;
       color: var(--muted);
-      font-size: .92rem;
+      font-size: .82rem;
       min-height: 1.4em;
-      min-width: 0
+      min-width: 0;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .stem-status-copy {
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .status-dot {
@@ -1792,7 +1800,10 @@
       const selection = data.selection ? `<li><strong>Analyzed section:</strong> ${formatSeconds(data.selection.start_seconds)} - ${formatSeconds(data.selection.end_seconds)} (${formatSeconds(data.selection.duration_seconds)})</li>` : '';
       resetStemPlayback();
       clearStemCache();
-      const entries = Object.entries(data.stems);
+      const entries = Object.entries(data.stems || {})
+        .filter(([_, info]) => (info.features?.rms_energy || 0) > 0.0005)
+        .sort((a, b) => (b[1].features?.rms_energy || 0) - (a[1].features?.rms_energy || 0));
+
       const primaryOrder = ['vocals', 'instrumental'];
       const primary = primaryOrder.map((name) => entries.find(([stem]) => stem === name)).filter(Boolean);
       const secondary = entries.filter(([stem]) => !primaryOrder.includes(stem));
@@ -1882,7 +1893,7 @@
                   </div>
                 </div>
               </div>
-              <div class="transport-row">${transport}</div>
+              <div class="transport-row" style="margin-left: auto;">${transport}</div>
             </div>
             <div class="stem-visual">
               <div class="visual-grid">${bars}</div>
@@ -1936,7 +1947,7 @@
                 </div>
               </div>
             </div>
-            <div class="transport-row">${transport}</div>
+            <div class="transport-row" style="margin-left: auto;">${transport}</div>
           </div>
           <div class="mini-meta">
             <div class="stem-inline-stat"><span>BPM</span><strong>${info.features.bpm}</strong></div>
