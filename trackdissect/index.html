@@ -1402,8 +1402,17 @@
                     class="eyebrow">Queued</span></div>
                 <strong id="progressLabel">Processing</strong>
               </div>
-              <div class="process-meta"><strong id="progressValue">0%</strong><span id="processElapsed"
-                  class="process-time">00:00</span></div>
+              <div class="process-meta">
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                  <div style="display: flex; align-items: baseline; gap: 8px;">
+                    <strong id="progressValue">0%</strong>
+                    <span id="processElapsed" class="process-time">00:00</span>
+                  </div>
+                  <button id="cancelBtn" class="fine"
+                    style="background: rgba(255,110,72,0.1); border: 1px solid rgba(255,110,72,0.3); color: var(--danger); padding: 4px 8px; border-radius: 8px; cursor: pointer; font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">Cancel
+                    Analysis</button>
+                </div>
+              </div>
             </div>
             <p id="progressCaption" class="process-caption">Demucs can take a little while. Keep this tab open while the
               separation runs.</p>
@@ -1545,6 +1554,7 @@
     const LEGACY_SESSION_KEY = 'trackdissect:last-session';
     const fileInput = document.getElementById('fileInput');
     const analyzeBtn = document.getElementById('analyzeBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
     const message = document.getElementById('message');
     const progressShell = document.getElementById('progressShell');
     const progressFill = document.getElementById('progressFill');
@@ -1690,6 +1700,33 @@
       } catch (error) {
         analyzeBtn.disabled = false;
         setMessage(error.message, true);
+      }
+    });
+
+    cancelBtn.addEventListener('click', async () => {
+      if (!state.jobId) return;
+      if (!confirm('Are you sure you want to cancel the current analysis? This will stop all processing.')) return;
+
+      cancelBtn.disabled = true;
+      cancelBtn.textContent = 'Cancelling...';
+
+      try {
+        const response = await fetch(`/cancel/${state.jobId}`, { method: 'POST' });
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.detail || 'Cancellation failed.');
+        }
+
+        clearStoredSession();
+        state.jobId = null;
+        clearInterval(state.poller);
+        resetProcessingUI();
+        analyzeBtn.disabled = false;
+        setMessage('Analysis cancelled by user.', true);
+      } catch (error) {
+        setMessage(error.message, true);
+        cancelBtn.disabled = false;
+        cancelBtn.textContent = 'Cancel Analysis';
       }
     });
 

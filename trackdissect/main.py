@@ -5,6 +5,8 @@ import os
 import json
 import threading
 import time
+import subprocess
+import shutil
 from dotenv import load_dotenv
 
 from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, UploadFile
@@ -45,6 +47,8 @@ ICONS = {
     "other": "wave"
 }
 JOBS: dict[str, dict] = {}
+RUNNING_PROCESSES: dict[str, subprocess.Popen] = {}
+_process_lock = threading.Lock()
 JOBS_FILE = DATA_DIR / "jobs.json"
 MAX_JOBS_IN_MEMORY = 20
 
@@ -154,6 +158,7 @@ def process_job(job_id: str) -> None:
             mode=job.get("quality", "fast"),
             event_callback=lambda text: _append_log(job_id, text, phase="separate"),
             technical_callback=lambda text: _append_log(job_id, text, phase="separate", technical=True),
+            on_process_ready=lambda p: RUNNING_PROCESSES.update({job_id: p}),
         )
         analyses = {}
         analysis_start = 48
@@ -194,8 +199,13 @@ def process_job(job_id: str) -> None:
         )
         _append_log(job_id, f"Analysis complete. {len(stem_data)} downloadable outputs are ready.", phase="done")
     except Exception as exc:
+        if job_id in JOBS and JOBS[job_id]["status"] == "cancelled":
+            return # Silent exit for cancellation
         _update(job_id, status="error", stage="error", progress=100, message=str(exc))
         _append_log(job_id, f"Processing stopped: {exc}", phase="error")
+    finally:
+        with _process_lock:
+            RUNNING_PROCESSES.pop(job_id, None)
 
 
 @app.get("/")
@@ -246,6 +256,36 @@ async def upload_audio(
     }
     background_tasks.add_task(process_job, job_id)
     return {"job_id": job_id, "filename": filename, "trim_start": trim_start, "trim_end": trim_end}
+
+
+@app.post("/cancel/{job_id}")
+async def cancel_job(job_id: str):
+    job = _job(job_id)
+    if job["status"] not in ("processing", "queued"):
+        raise HTTPException(status_code=400, detail="Only processing or queued jobs can be cancelled.")
+    
+    _update(job_id, status="cancelled", message="Analysis cancelled by user.", progress=100)
+    _append_log(job_id, "Job cancelled by user. Terminating active processes.", phase="cancelled")
+    
+    with _process_lock:
+        process = RUNNING_PROCESSES.pop(job_id, None)
+        if process:
+            try:
+                # Terminate process group to catch children
+                process.terminate()
+                process.wait(timeout=5)
+            except Exception:
+                process.kill()
+    
+    # Cleanup output directory
+    job_dir = OUTPUT_DIR / job_id
+    if job_dir.exists():
+        try:
+            shutil.rmtree(job_dir)
+        except Exception:
+            pass
+            
+    return {"message": "Job cancelled successfully."}
 
 
 @app.get("/status/{job_id}")

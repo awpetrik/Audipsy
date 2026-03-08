@@ -66,14 +66,20 @@ def _build_demucs_command(model: str, source: Path, output_dir: Path, *, two_ste
     return cmd
 
 
-def _run_demucs(model: str, source: Path, output_dir: Path, *, two_stems: str | None = None, mode: str = "fast") -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        _build_demucs_command(model, source, output_dir, two_stems=two_stems, mode=mode),
-        capture_output=True,
-        text=True,
-        check=False,
-        timeout=int(os.getenv("DEMUCS_TIMEOUT", "1800")),
-    )
+def _run_demucs(model: str, source: Path, output_dir: Path, *, two_stems: str | None = None, mode: str = "fast", on_process_ready=None) -> subprocess.CompletedProcess[str]:
+    cmd = _build_demucs_command(model, source, output_dir, two_stems=two_stems, mode=mode)
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    if on_process_ready:
+        on_process_ready(process)
+    
+    try:
+        stdout, stderr = process.communicate(timeout=int(os.getenv("DEMUCS_TIMEOUT", "1800")))
+    except subprocess.TimeoutExpired:
+        process.kill()
+        stdout, stderr = process.communicate()
+        raise
+        
+    return subprocess.CompletedProcess(cmd, process.returncode, stdout, stderr)
 
 
 def _result_detail(result: subprocess.CompletedProcess[str]) -> str:
@@ -115,6 +121,7 @@ def _attempt_demucs(
     technical_callback=None,
     pass_label: str = "separation",
     mode: str = "fast",
+    on_process_ready=None,
 ) -> dict[str, Path]:
     attempts: list[tuple[str, subprocess.CompletedProcess[str]]] = []
     for model in models:
@@ -123,7 +130,7 @@ def _attempt_demucs(
         try:
             if event_callback:
                 event_callback(f"Starting {pass_label} with {model} ({mode} mode).")
-            result = _run_demucs(model, source, output_dir, two_stems=two_stems, mode=mode)
+            result = _run_demucs(model, source, output_dir, two_stems=two_stems, mode=mode, on_process_ready=on_process_ready)
         except FileNotFoundError as exc:
             raise RuntimeError("Demucs is not installed or not available on PATH.") from exc
         except subprocess.TimeoutExpired as exc:
@@ -310,7 +317,7 @@ def _transfer_metadata(src_path: Path, dst_path: Path, stem_name: str) -> None:
         print(f"DEBUG: Metadata transfer error: {e}")
 
 # Run Demucs and return the generated stem files for the current job.
-def separate_audio(input_path: str | Path, output_root: str | Path, *, mode: str = "fast", event_callback=None, technical_callback=None) -> dict:
+def separate_audio(input_path: str | Path, output_root: str | Path, *, mode: str = "fast", event_callback=None, technical_callback=None, on_process_ready=None) -> OrderedDict:
     source = Path(input_path)
     output_dir = Path(output_root)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -323,8 +330,9 @@ def separate_audio(input_path: str | Path, output_root: str | Path, *, mode: str
         stem_names=FULL_STEM_MODELS,
         event_callback=event_callback,
         technical_callback=technical_callback,
-        pass_label="full stem pass",
+        pass_label="instrumental/vocal pass",
         mode=mode,
+        on_process_ready=on_process_ready,
     )
 
     split_models = _resolve_models(os.getenv("DEMUCS_VOCAL_MODEL", "htdemucs_ft"), VOCAL_SPLIT_MODELS)
@@ -338,7 +346,9 @@ def separate_audio(input_path: str | Path, output_root: str | Path, *, mode: str
             two_stems="vocals",
             event_callback=event_callback,
             technical_callback=technical_callback,
-            pass_label="dedicated vocal split",
+            pass_label="vocal sub-split pass",
+            mode=mode,
+            on_process_ready=on_process_ready,
         )
     except RuntimeError:
         if event_callback:
