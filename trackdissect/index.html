@@ -2394,7 +2394,12 @@
       renderProcessStages(stageKey, data.status);
       renderProcessActivity(data.activity || [], data.started_at || data.created_at);
       renderTechnicalLog(data.technical_logs || []);
-      if (data.status === 'error' && (data.technical_logs || []).length) technicalPanel.open = true;
+
+      const isDone = data.status === 'done';
+      const isError = data.status === 'error';
+      cancelBtn.style.display = (isDone || isError) ? 'none' : 'block';
+
+      if (isError && (data.technical_logs || []).length) technicalPanel.open = true;
       syncProcessClock(data.started_at || data.created_at, data.status);
     }
 
