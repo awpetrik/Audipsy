@@ -140,7 +140,18 @@
 
     body[data-app-state="idle"] .hero-grid {
       grid-template-columns: 1fr;
-      max-width: 720px;
+      max-width: 680px;
+      margin-left: auto;
+      margin-right: auto;
+      gap: 0;
+    }
+
+    body[data-app-state="idle"] .hero {
+      text-align: center;
+      padding-bottom: 50px;
+    }
+
+    body[data-app-state="idle"] .hero p {
       margin-left: auto;
       margin-right: auto;
     }
@@ -230,12 +241,13 @@
     }
 
     #analyzeBtn:disabled {
-      background: rgba(255, 138, 42, 0.05);
-      color: rgba(255, 255, 255, 0.15);
-      border-color: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 138, 42, 0.04) !important;
+      color: rgba(255, 255, 255, 0.1) !important;
+      border: 1px solid rgba(255, 255, 255, 0.03) !important;
       cursor: not-allowed;
       transform: none !important;
       box-shadow: none !important;
+      opacity: 0.6;
     }
 
     #analyzeBtn.pulse:not(:disabled) {
@@ -440,9 +452,10 @@
       transform: translateY(-1px)
     }
 
-    button[disabled] {
-      opacity: .5;
-      cursor: not-allowed
+    button[disabled]:not(.trim-handle) {
+      opacity: 0.6;
+      cursor: not-allowed;
+      filter: grayscale(1);
     }
 
     .ghost {
