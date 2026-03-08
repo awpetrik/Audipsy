@@ -11,7 +11,8 @@ The application uses a FastAPI backend and a single-file HTML, CSS, and JavaScri
 - **EDM Specialized Stems**: Beyond standard separation, Audipsy isolates:
   - **Sub-Bass vs Mid-Bass** (Precision 80Hz Crossover)
   - **Kick vs Top-Drums** (Precision 120Hz Isolation)
-- **Anti-Artifact Smoothing**: 14kHz high-shelf filter to reduce digital harshness for AirPods/critical listening
+- **Vocal Layering Separation**: Isolate **Lead Vocal** from **Vocal Layers** (Harmonies/Stereo Width) using professional Mid-Side (MS) decomposition.
+- **Anti-Artifact Smoothing**: 14kHz high-shelf filter to reduce digital harshness.
 - **Metadata Preservation**: Copies Artist, Title, Album, and **Album Art** to all downloaded stems
 - **Processing Quality Modes**:
   - **Fast**: Rapid 1-shift separation
@@ -48,7 +49,7 @@ trackdissect/
 1. The user uploads an audio file (up to 12MB).
 2. The user selects a trim window and processing quality (Fast/Accurate).
 3. The backend trims the audio and performs Demucs separation.
-4. **EDM Crossover**: specialized filters split the Bass and Drums into sub-components.
+4. **Vocal & EDM Splits**: Specialized filters and MS decomposition split the vocals (Lead/Layers), bass (Sub/Mid), and drums (Kick/Top) into sub-components.
 5. **Post-Processing**: All stems are smoothed, peak-normalized (-0.5dBFS), and tagged with original metadata.
 6. Librosa/Gemini analyze the sonic profile to generate a "Senior Sound Designer" report.
 7. The frontend renders a premium dark-mode dashboard with SVG-iconed stem cards and a full arrangement narrative.

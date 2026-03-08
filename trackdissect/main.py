@@ -38,6 +38,8 @@ ICONS = {
     "bass": "bass",
     "sub_bass": "sub",
     "mid_bass": "mid",
+    "lead_vocal": "lead_vocal",
+    "vocal_layers": "vocal_layers",
     "guitar": "gtr",
     "piano": "key",
     "other": "wave"

@@ -17,7 +17,7 @@ FULL_STEM_MODELS = {
     "htdemucs": ("vocals", "drums", "bass", "other"),
 }
 VOCAL_SPLIT_MODELS = ("htdemucs_ft", "htdemucs")
-STEM_ORDER = ("vocals", "instrumental", "drums", "kick", "top_drums", "bass", "sub_bass", "mid_bass", "guitar", "piano", "other")
+STEM_ORDER = ("vocals", "lead_vocal", "vocal_layers", "instrumental", "drums", "kick", "top_drums", "bass", "sub_bass", "mid_bass", "guitar", "piano", "other")
 
 
 def _resolve_models(preferred: str, candidates: tuple[str, ...] | list[str]) -> list[str]:
@@ -193,6 +193,31 @@ def _apply_deharsh_filter(audio: np.ndarray, sr: int) -> np.ndarray:
     b, a = butter(1, cutoff / nyquist, btype='low')
     return lfilter(b, a, audio, axis=0)
 
+def _apply_ms_split(audio: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Decomposes stereo audio into Mid (Center/Lead) and Side (Stereo/Layers)."""
+    if audio.shape[1] < 2:
+        # Mono file: Lead is M, Side is zero
+        return audio, np.zeros_like(audio)
+    
+    L = audio[:, 0]
+    R = audio[:, 1]
+    
+    # Mid = (L + R) / 2 (Center energy)
+    M = (L + R) / 2.0
+    # Side = (L - R) / 2 (Stereo energy)
+    S = (L - R) / 2.0
+    
+    # Reconstruct as stereo pairs
+    # Lead: Mid in both channels
+    lead = np.stack([M, M], axis=1)
+    
+    # Layers: Side in antiphase to represent width
+    # This keeps the stereo field character of the backing tracks
+    layers = np.stack([S, -S], axis=1)
+    
+    return lead, layers
+
+
 def _apply_crossover(audio: np.ndarray, sr: int, cutoff: float) -> tuple[np.ndarray, np.ndarray]:
     """Linkwitz-Riley 4th order crossover (implemented as stacked 2nd order Butterworth)."""
     nyquist = 0.5 * sr
@@ -331,6 +356,22 @@ def separate_audio(input_path: str | Path, output_root: str | Path, *, mode: str
         combined["instrumental"] = _mix_instrumental(full_stems, output_dir / "derived" / "instrumental.wav")
         if event_callback:
             event_callback("Instrumental mix rebuilt from the non-vocal stems.")
+
+    if "vocals" in combined:
+        try:
+            if event_callback:
+                event_callback("Isolating Lead Vocal vs Backing Layers (M/S Decomposition)...")
+            audio, sr = sf.read(combined["vocals"], always_2d=True)
+            lead, layers = _apply_ms_split(audio)
+            lead_path = output_dir / "lead_vocal.wav"
+            layers_path = output_dir / "vocal_layers.wav"
+            sf.write(lead_path, lead, sr, subtype="PCM_16")
+            sf.write(layers_path, layers, sr, subtype="PCM_16")
+            combined["lead_vocal"] = lead_path
+            combined["vocal_layers"] = layers_path
+        except Exception as e:
+            if technical_callback:
+                technical_callback(f"Vocal MS split failed: {e}")
 
     # Generate EDM sub-stems and add to combined dictionary first
     if "bass" in combined:
