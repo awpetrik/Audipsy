@@ -176,7 +176,27 @@ def process_job(job_id: str) -> None:
             _append_log(job_id, "AI Production Report skipped by user request.", phase="report")
             report = {
                 "stems": {},
-                "full_report": "AI Production Report was skipped per user request. Technical analysis of stems is available below."
+                "full_report": {
+                    "genre_guess": "Skipped",
+                    "production_style": "Technical Analysis Only",
+                    "musical_characteristics": {
+                        "mood": "N/A",
+                        "harmonic_complexity": "N/A",
+                        "rhythmic_identity": "N/A"
+                    },
+                    "arrangement_narrative": {
+                        "structure_guess": "N/A",
+                        "energy_flow": "N/A",
+                        "build_up_technique": "N/A"
+                    },
+                    "sound_architecture": {
+                        "technical_summary": "AI Production Report was skipped per user request. Technical features for each stem are available in the dashboard.",
+                        "synthesis_tips": "N/A"
+                    },
+                    "similar_artists": [],
+                    "notable_techniques": [],
+                    "pro_workflow_tip": "Enable 'AI Production Report' toggle for automated mixing insights and Logic Pro tips."
+                }
             }
         else:
             report = generate_report(job["filename"], track_features, analyses)
@@ -187,7 +207,16 @@ def process_job(job_id: str) -> None:
                 "preview_url": f"/media/{job_id}/{stem}",
                 "download_url": f"/media/{job_id}/{stem}",
                 "features": features,
-                "analysis": report["stems"].get(stem, {"detected_instruments": [stem], "likely_fx": [], "confidence": "low"}),
+                "analysis": report["stems"].get(stem, {
+                    "detected_instruments": [stem],
+                    "likely_fx": [],
+                    "mixing_logic": {
+                        "eq": "Technical profile only",
+                        "dynamics": "N/A",
+                        "space": "N/A"
+                    },
+                    "confidence": "low"
+                }),
             }
         _update(
             job_id,
