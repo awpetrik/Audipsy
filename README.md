@@ -20,6 +20,29 @@ The application uses a FastAPI backend and a single-file HTML, CSS, and JavaScri
 - Browser-based waveform preview and selectable trim window
 - AI-generated production analysis with Gemini (Claude fallback)
 
+## Tech Stack
+
+- Python
+- FastAPI
+- Librosa
+- Mutagen (for Metadata & Album Art)
+- Demucs
+- Google Gemini API (Primary)
+- Anthropic Claude API (Optional Fallback)
+- HTML, CSS, and vanilla JavaScript
+
+## Project Structure
+
+```text
+trackdissect/
+├── ai_report.py    # AI Prompting & Report Generation
+├── analyzer.py     # Audio Feature Extraction (Librosa)
+├── index.html      # Premium Dark-Mode Frontend
+├── main.py         # FastAPI Core & Job Management
+├── requirements.txt
+└── separator.py    # Demucs Processing & Crossover Filters
+```
+
 ## How It Works
 
 1. The user uploads an audio file (up to 12MB).
@@ -30,27 +53,44 @@ The application uses a FastAPI backend and a single-file HTML, CSS, and JavaScri
 6. Librosa/Gemini analyze the sonic profile to generate a "Senior Sound Designer" report.
 7. The frontend renders a premium dark-mode dashboard with SVG-iconed stem cards and a full arrangement narrative.
 
-## Requirements
+## Configuration
 
-- Python 3.10 or newer
-- `pip`
-- `ffmpeg` (Required for metadata injection and format support)
-- `demucs`
-- Gemini API key
+Audipsy reads configuration from environment variables.
 
-## Installation
-
+### Required for Gemini
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r trackdissect/requirements.txt
+export GEMINI_API_KEY="your_api_key"
 ```
 
-## Running the Application
-
+### Optional
 ```bash
-uvicorn trackdissect.main:app --reload
+export AI_PROVIDER=auto  # gemini, claude, or auto
+export GEMINI_MODEL=gemini-3-flash-preview
+export ANTHROPIC_API_KEY="your_anthropic_key"
 ```
+
+## API Endpoints
+
+### `POST /upload`
+Accepts a single file upload and returns a job identifier.
+
+### `GET /status/{job_id}`
+Returns current state, progress, activity logs, and technical logs.
+
+### `GET /results/{job_id}`
+Returns the full analysis payload once processing is complete.
+
+## Analysis Output
+
+Each completed job includes:
+- **Track-level features**: BPM, Key, Energy, Danceability.
+- **Per-stem features**: Spectral Centroid, Flatness, Crest Factor, Stereo Correlation.
+- **AI-generated report**:
+  - Genre & Similar Artists
+  - Musical Characteristics (Mood, Harmony, Rhythm)
+  - Arrangement Narrative (Structure, Energy Flow)
+  - Sound Architecture (Technical summary & Synthesis tips)
+  - **Logic Pro Workflow Tip**
 
 ## Current Limitations
 
