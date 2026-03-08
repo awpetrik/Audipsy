@@ -17,6 +17,7 @@ The application uses a FastAPI backend and a single-file HTML, CSS, and JavaScri
 - **Processing Quality Modes**:
   - **Fast**: Rapid 1-shift separation
   - **Accurate**: High-fidelity 4-shift separation
+- **Skip AI Report**: Option to bypass AI generation for faster results when only stems are needed.
 - **Ruthless Performance**: Throttled atomic persistence and capped job history for stability
 - Browser-based waveform preview and selectable trim window
 - AI-generated production analysis with Gemini (Claude fallback)

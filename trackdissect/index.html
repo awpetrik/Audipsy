@@ -1392,6 +1392,14 @@
               <button type="button" class="quality-opt active" data-quality="fast">Fast</button>
               <button type="button" class="quality-opt" data-quality="accurate">Accurate</button>
             </div>
+            <label class="skip-opt"
+              style="margin-top: 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
+              <input type="checkbox" id="skipReportToggle"
+                style="width: 14px; height: 14px; accent-color: var(--accent);">
+              <span class="fine"
+                style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700; color: var(--muted);">Skip AI
+                Production Report</span>
+            </label>
           </div>
           <button id="analyzeBtn">Analyze Track</button>
           <div id="message" class="fine">Waiting for audio.</div>
@@ -1682,6 +1690,7 @@
       priorityResults.innerHTML = '';
       secondaryResults.innerHTML = '';
       fullReport.innerHTML = '';
+      const skipReport = document.getElementById('skipReportToggle').checked;
       const formData = new FormData();
       formData.append('file', state.file);
       formData.append('trim_start', state.trimStart);
@@ -1689,6 +1698,7 @@
 
       const activeQual = document.querySelector('.quality-opt.active');
       formData.append('quality', activeQual ? activeQual.dataset.quality : 'fast');
+      formData.append('skip_report', skipReport);
 
       try {
         const response = await fetch('/upload', { method: 'POST', body: formData });

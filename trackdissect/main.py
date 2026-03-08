@@ -171,7 +171,15 @@ def process_job(job_id: str) -> None:
             _append_log(job_id, f"Analyzing {stem} profile and frequency range.", phase="analyze")
             analyses[stem] = analyze_audio(path)
         _set_stage(job_id, stage="report", progress=88, message="Generating production report...", event="Writing the production summary and instrument notes.")
-        report = generate_report(job["filename"], track_features, analyses)
+        
+        if job.get("skip_report"):
+            _append_log(job_id, "AI Production Report skipped by user request.", phase="report")
+            report = {
+                "stems": {},
+                "full_report": "AI Production Report was skipped per user request. Technical analysis of stems is available below."
+            }
+        else:
+            report = generate_report(job["filename"], track_features, analyses)
         stem_data = {}
         for stem, features in analyses.items():
             stem_data[stem] = {
@@ -220,6 +228,7 @@ async def upload_audio(
     trim_start: float = Form(0),
     trim_end: float | None = Form(None),
     quality: str = Form("fast"),
+    skip_report: bool = Form(False),
 ):
     if not file.filename or Path(file.filename).suffix.lower() not in ALLOWED_EXTS:
         raise HTTPException(status_code=400, detail="Upload an MP3, WAV, AAC, or M4A file.")
@@ -248,6 +257,7 @@ async def upload_audio(
         "trim_start": trim_start,
         "trim_end": trim_end,
         "quality": quality,
+        "skip_report": skip_report,
         "created_at": _timestamp(),
         "updated_at": _timestamp(),
         "started_at": None,
