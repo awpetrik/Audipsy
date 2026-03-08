@@ -6,52 +6,175 @@
   <title>TrackDissect</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Oxanium:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{--bg:#060816;--panel:#0d1326;--panel-2:#121b33;--line:rgba(122,170,255,.18);--text:#eef2ff;--muted:#9ba7c8;--cyan:#63f5df;--amber:#ffbb63;--danger:#ff7d7d}
-    *{box-sizing:border-box}body{margin:0;font-family:"IBM Plex Sans",sans-serif;color:var(--text);background:radial-gradient(circle at top,#132447 0,#060816 48%),#060816}
-    body::before{content:"";position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(#000,transparent 92%);pointer-events:none}
-    .shell{width:min(1100px,calc(100% - 28px));margin:24px auto 40px}.hero,.panel,.card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01));border:1px solid var(--line);border-radius:24px;box-shadow:0 20px 70px rgba(0,0,0,.28)}
-    .hero{padding:28px 28px 22px;position:relative;overflow:hidden}.hero::after{content:"";position:absolute;inset:auto -40px -40px auto;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,var(--amber),transparent 70%);opacity:.18}
-    .eyebrow,.kpi-label{font:600 .75rem/1 "Oxanium",sans-serif;text-transform:uppercase;letter-spacing:.18em;color:var(--cyan)}h1,h2,h3{font-family:"Oxanium",sans-serif;margin:0}
-    h1{font-size:clamp(2.2rem,7vw,4.6rem);letter-spacing:.05em}.hero p{max-width:680px;color:var(--muted);margin:12px 0 0;line-height:1.6}
-    .hero-grid,.results{display:grid;gap:18px}.hero-grid{grid-template-columns:1.15fr .85fr;margin-top:24px}.panel{padding:22px}.upload{display:grid;gap:14px}
-    .dropzone{border:1px dashed rgba(99,245,223,.35);border-radius:20px;padding:22px;background:rgba(99,245,223,.05)}.dropzone strong{display:block;margin-bottom:6px}
-    input[type=file]{width:100%;padding:14px;border-radius:14px;border:1px solid var(--line);background:#09111f;color:var(--text)}
-    button,.ghost{border:none;border-radius:999px;padding:13px 18px;background:linear-gradient(90deg,var(--cyan),#94ffd6);color:#04131d;font:700 .9rem/1 "Oxanium",sans-serif;cursor:pointer}
-    button[disabled]{opacity:.5;cursor:not-allowed}.ghost{background:transparent;color:var(--text);border:1px solid var(--line);display:inline-flex;align-items:center;gap:8px;text-decoration:none}
-    .meta,.kpis,.stats,.report-list{display:grid;gap:12px}.meta{grid-template-columns:1fr auto}.meta strong{display:block;font-size:1rem}.meta span,.fine,.muted{color:var(--muted)}
-    canvas{width:100%;height:140px;background:linear-gradient(180deg,rgba(99,245,223,.05),rgba(255,255,255,.02));border:1px solid var(--line);border-radius:18px}
-    .trim-box{margin-top:14px;padding:16px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.02)}
-    .trim-metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}.trim-metrics div{padding:14px;border-radius:16px;border:1px solid rgba(255,255,255,.06);background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015))}
-    .trim-metrics span{display:block;color:var(--muted);margin-bottom:6px}.trim-metrics strong,.trim-readout strong,.trim-ruler strong{font-family:"Oxanium",sans-serif}
-    .trim-note{margin-top:12px;color:var(--muted)}
-    .trim-ruler{display:flex;justify-content:space-between;gap:12px;margin-top:14px;color:var(--muted);font-size:.82rem}
-    .trim-slider{position:relative;height:64px;margin-top:10px;touch-action:none}.trim-track,.trim-selection{position:absolute;top:50%;transform:translateY(-50%);border-radius:999px}
-    .trim-track{left:0;right:0;height:18px;background:#05070f;box-shadow:inset 0 3px 8px rgba(0,0,0,.65),0 0 16px rgba(0,0,0,.22)}
-    .trim-selection{left:0;width:0;height:26px;background:linear-gradient(90deg,rgba(99,245,223,.82),rgba(255,187,99,.72));border:1px solid rgba(255,255,255,.08);box-shadow:0 0 24px rgba(99,245,223,.18);cursor:grab}
+    :root{--bg:#090603;--bg-2:#120d08;--panel:#14100c;--panel-2:#1b150f;--line:#302519;--line-strong:#5a4126;--text:#f4ecdf;--muted:#ad9d88;--accent:#ff8a2a;--accent-soft:#ffd2a1;--accent-faint:rgba(255,138,42,.12);--accent-faint-2:rgba(255,138,42,.18);--danger:#ff6e48}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:"IBM Plex Mono",monospace;color:var(--text);background:radial-gradient(circle at top left,rgba(255,138,42,.12),transparent 26%),radial-gradient(circle at bottom right,rgba(255,138,42,.08),transparent 24%),linear-gradient(180deg,#080603 0,#0d0906 48%,#130d08 100%)}
+    body::before{content:"";position:fixed;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.02),transparent 34%),radial-gradient(circle at 25% 18%,rgba(255,138,42,.06),transparent 32%);pointer-events:none}
+    .shell{width:min(1240px,calc(100% - 32px));margin:24px auto 56px;display:grid;gap:20px}
+    .hero,.panel,.card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015));border:1px solid var(--line);border-radius:24px;box-shadow:0 22px 56px rgba(0,0,0,.28)}
+    .hero{padding:30px 30px 26px;position:relative;overflow:hidden}
+    .hero::after{content:"";position:absolute;inset:auto -80px -80px auto;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,138,42,.18),transparent 72%);opacity:.8}
+    .eyebrow,.kpi-label,.section-label{font:600 .78rem/1 "IBM Plex Mono",monospace;text-transform:uppercase;letter-spacing:.16em;color:var(--accent)}
+    h1,h2,h3{margin:0;font-family:"IBM Plex Mono",monospace}
+    h1{font-size:clamp(3rem,8vw,5.6rem);letter-spacing:-.06em;line-height:.9}
+    h2{font-size:1.4rem;letter-spacing:-.04em}
+    h3{letter-spacing:-.05em}
+    .hero p{max-width:760px;margin:14px 0 0;color:var(--muted);line-height:1.85}
+    .hero-grid,.results,.kpis,.trim-metrics,.stat-grid{display:grid;gap:16px}
+    .hero-grid{grid-template-columns:minmax(320px,.88fr) minmax(440px,1.12fr);align-items:start;margin-top:26px}
+    .panel{padding:22px}
+    .upload{display:grid;gap:14px}
+    .dropzone{padding:20px;border-radius:20px;border:1px dashed rgba(255,138,42,.38);background:linear-gradient(180deg,rgba(255,138,42,.08),rgba(255,138,42,.04))}
+    .dropzone strong{display:block;margin-bottom:8px;font-size:1.1rem}
+    input[type=file]{width:100%;padding:14px 16px;border-radius:16px;border:1px solid var(--line);background:#0b0805;color:var(--text);font:500 1rem/1.4 "IBM Plex Mono",monospace}
+    input[type=file]::file-selector-button{margin-right:14px;border:none;border-radius:10px;padding:10px 12px;background:var(--accent-soft);color:#120a04;font:700 .92rem/1 "IBM Plex Mono",monospace;cursor:pointer}
+    button,.ghost{border:1px solid transparent;border-radius:14px;padding:14px 16px;background:var(--accent);color:#110904;font:700 .94rem/1 "IBM Plex Mono",monospace;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;transition:transform .18s ease,background .18s ease,border-color .18s ease,color .18s ease}
+    button:not(.trim-handle):hover,.ghost:hover{transform:translateY(-1px)}
+    button[disabled]{opacity:.5;cursor:not-allowed}
+    .ghost{background:transparent;border-color:var(--line-strong);color:var(--text);display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+    .meta,.report-list{display:grid;gap:10px}
+    .meta{grid-template-columns:1fr auto;align-items:start}
+    .meta strong{display:block;font-size:1rem}
+    .meta span,.fine,.muted{color:var(--muted)}
+    canvas{width:100%;height:176px;background:#060403;border:1px solid var(--line-strong);border-radius:20px}
+    .source-audio{display:none}
+    .waveform-shell{position:relative;margin-top:12px}
+    .waveform-shell canvas{display:block}
+    .waveform-surface{position:absolute;inset:0;border-radius:20px;touch-action:none;z-index:2}
+    .preview-transport,.preview-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .preview-transport{margin-top:14px;padding:14px 16px;border-radius:20px;border:1px solid var(--line);background:rgba(255,255,255,.02)}
+    .preview-play{min-width:98px}
+    .preview-timecode{display:flex;align-items:baseline;gap:6px;white-space:nowrap}
+    .preview-timecode strong{font-size:1.28rem;line-height:1}
+    .preview-timecode span{color:var(--muted)}
+    .preview-seek{position:relative;flex:1 1 240px;height:14px;border-radius:999px;border:1px solid var(--line);background:#090603;overflow:visible;cursor:pointer;touch-action:none}
+    .preview-seek[data-disabled=true]{opacity:.45;cursor:not-allowed}
+    .preview-seek-fill{position:absolute;inset:0 auto 0 0;width:0;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent-soft))}
+    .preview-seek-thumb{position:absolute;top:50%;left:0;width:16px;height:16px;border-radius:50%;background:#fff4e8;border:1px solid rgba(255,255,255,.28);box-shadow:0 0 0 4px rgba(255,138,42,.14);transform:translate(-50%,-50%)}
+    .preview-toolbar{margin-top:10px}
+    .preview-toggle{min-width:188px}
+    .preview-toggle[aria-pressed=true]{background:rgba(255,138,42,.1);border-color:rgba(255,138,42,.34);color:var(--accent-soft)}
+    .shortcut-hint{font-size:.8rem;letter-spacing:.04em;text-transform:uppercase}
+    .trim-box{margin-top:14px;padding:16px 18px;border-radius:20px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01))}
+    .trim-metrics{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:12px}
+    .trim-metrics div,.kpi,.metric,.process-step,.stem-visual,.activity-panel,.tech-panel,.stem-section,.stem-inline-stat{padding:14px;border-radius:18px;border:1px solid rgba(255,255,255,.05);background:rgba(255,255,255,.02)}
+    .trim-metrics span,.metric span,.visual-footer span,.mini-meta span{display:block;color:var(--muted);margin-bottom:7px;font-size:.78rem;text-transform:uppercase;letter-spacing:.08em}
+    .trim-metrics strong,.metric strong,.visual-footer strong{font-weight:700}
+    .trim-note{margin-top:12px;color:var(--muted);line-height:1.7}
+    .trim-selection{position:absolute;top:4px;bottom:4px;left:0;width:0;border-radius:18px;border:2px solid rgba(255,166,73,.96);box-shadow:0 0 0 1px rgba(255,244,232,.18) inset,0 0 0 999px rgba(5,3,2,.18);background:linear-gradient(180deg,rgba(255,194,128,.18),rgba(255,138,42,.2));cursor:grab;z-index:1}
     .trim-selection.dragging{cursor:grabbing}
-    .trim-handle{position:absolute;top:50%;transform:translate(-50%,-50%);width:22px;height:38px;padding:0;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:linear-gradient(180deg,#f4f6ff,#9ca4bb);box-shadow:0 10px 24px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.55)}
-    .trim-handle::after{content:"";display:block;width:8px;height:18px;margin:auto;border-radius:4px;background:repeating-linear-gradient(180deg,rgba(4,19,29,.58),rgba(4,19,29,.58) 2px,transparent 2px,transparent 4px)}.trim-handle:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+    .trim-handle{position:absolute;top:10px;bottom:10px;width:26px;height:auto;padding:0;border:none;background:transparent;box-shadow:none;transform:translateX(-50%);z-index:3}
+    .trim-handle::before{content:"";position:absolute;top:-1px;left:50%;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff6ed 0 24%,#ffd39f 25%,#ff9c3f 68%,#d86f17 100%);border:1px solid rgba(34,19,9,.58);box-shadow:0 0 0 5px rgba(255,138,42,.26),0 10px 18px rgba(0,0,0,.28);transform:translateX(-50%)}
+    .trim-handle::after{content:"";position:absolute;top:18px;bottom:0;left:50%;width:3px;border-radius:999px;background:linear-gradient(180deg,rgba(255,247,235,.98),rgba(255,183,96,.96),rgba(255,138,42,.8));box-shadow:0 0 8px rgba(255,138,42,.24);transform:translateX(-50%)}
+    .trim-handle:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
     .trim-handle[disabled]{opacity:.45;cursor:not-allowed}
-    .trim-readout{display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .progress-shell{display:none;margin-top:12px}.progress-shell.active{display:block}.bar{height:12px;border-radius:999px;background:#0a1020;border:1px solid var(--line);overflow:hidden}.fill{height:100%;width:0;background:linear-gradient(90deg,var(--amber),var(--cyan));transition:width .35s ease}
-    .kpis{grid-template-columns:repeat(3,1fr)}.kpi{padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.02)}.kpi strong{display:block;font-size:1.2rem;margin-top:6px}
-    .results{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin-top:18px}.card{padding:18px 18px 20px}.stem-card{position:relative;display:grid;gap:16px;overflow:hidden;min-height:460px;background:linear-gradient(180deg,rgba(12,20,42,.92),rgba(7,12,28,.96));border-color:rgba(122,170,255,.22);transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}.stem-card::before{content:"";position:absolute;inset:-35% auto auto -10%;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(99,245,223,.12),transparent 72%);pointer-events:none}
-    .stem-card:hover{transform:translateY(-3px);border-color:rgba(99,245,223,.3);box-shadow:0 26px 80px rgba(0,0,0,.34)}.stem-card[data-state=playing]{border-color:rgba(99,245,223,.42);box-shadow:0 28px 90px rgba(0,0,0,.4),0 0 0 1px rgba(99,245,223,.1) inset}.stem-card[data-state=loading]{border-color:rgba(255,187,99,.36)}
-    .stem-top,.stem-ident,.stem-title-row,.stem-status,.card-actions{display:flex;align-items:center}.stem-top,.stem-title-row,.card-actions{justify-content:space-between;gap:14px}.stem-ident{gap:14px}.stem-copy{min-width:0}.stem-copy h3{text-transform:capitalize;font-size:2rem;line-height:.95}.stem-title-row{align-items:flex-start}.confidence-pill{padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.08);font:.73rem/1 "Oxanium",sans-serif;letter-spacing:.08em;text-transform:uppercase}.confidence-pill.high{background:rgba(99,245,223,.1);color:var(--cyan)}.confidence-pill.medium{background:rgba(255,187,99,.1);color:#ffd49d}.confidence-pill.low{background:rgba(255,125,125,.12);color:#ffb3b3}
-    .icon{width:54px;height:54px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(180deg,rgba(99,245,223,.12),rgba(99,245,223,.04));border:1px solid rgba(99,245,223,.26);font:700 1.05rem/1 "Oxanium",sans-serif;text-transform:uppercase;color:var(--cyan);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
-    .stem-status{gap:8px;margin-top:10px;color:var(--muted);font-size:.92rem}.status-dot{width:10px;height:10px;border-radius:50%;background:rgba(155,167,200,.6);box-shadow:0 0 0 5px rgba(155,167,200,.08)}.stem-card[data-state=loading] .status-dot{background:var(--amber);box-shadow:0 0 0 5px rgba(255,187,99,.12);animation:pulseDot 1s ease-in-out infinite}.stem-card[data-state=playing] .status-dot{background:var(--cyan);box-shadow:0 0 0 5px rgba(99,245,223,.12);animation:pulseDot .85s ease-in-out infinite}.stem-card[data-state=error] .status-dot{background:var(--danger);box-shadow:0 0 0 5px rgba(255,125,125,.12)}
-    .transport{min-width:132px;justify-content:center;gap:10px;padding:14px 18px;font-size:.86rem;letter-spacing:.06em;text-transform:uppercase}.transport-orb{width:12px;height:12px;border-radius:50%;background:currentColor;box-shadow:0 0 0 4px rgba(255,255,255,.06)}.transport[data-state=loading] .transport-orb{border:2px solid rgba(255,255,255,.18);border-top-color:currentColor;background:transparent;animation:spin .8s linear infinite}.transport[data-state=playing]{background:linear-gradient(90deg,var(--cyan),#b6ffe6);color:#04131d;border:none}.transport[data-state=error]{color:#ffb3b3;border-color:rgba(255,125,125,.22)}
-    .stem-visual{position:relative;padding:14px 14px 12px;border-radius:18px;border:1px solid rgba(255,255,255,.06);background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015));overflow:hidden}.stem-visual::after{content:"";position:absolute;inset:auto -20px -55px auto;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(255,187,99,.12),transparent 72%);pointer-events:none}
-    .visual-grid{height:88px;display:grid;grid-template-columns:repeat(18,1fr);align-items:end;gap:6px}.visual-grid span{display:block;height:var(--bar);border-radius:999px 999px 4px 4px;background:linear-gradient(180deg,rgba(99,245,223,.92),rgba(99,245,223,.2));transform-origin:bottom center;transition:opacity .2s ease,transform .2s ease}.stem-card[data-state=playing] .visual-grid span{animation:equalize 1.15s ease-in-out infinite;animation-delay:var(--delay)}.stem-card[data-state=loading] .visual-grid span{animation:equalize 1.4s ease-in-out infinite;animation-delay:var(--delay);opacity:.68}
-    .visual-footer{display:flex;justify-content:space-between;gap:12px;margin-top:12px;color:var(--muted);font-size:.85rem}.visual-footer strong{display:block;color:var(--text);font-family:"Oxanium",sans-serif;font-size:1rem}
-    .stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{padding:12px 13px;border-radius:16px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02)}.metric span{display:block;color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em}.metric strong{display:block;margin-top:6px;font:700 1.02rem/1.2 "Oxanium",sans-serif;color:var(--text)}.metric-wide{grid-column:1 / -1}
-    .section-label{font:.76rem/1 "Oxanium",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{padding:8px 11px;border-radius:999px;background:rgba(255,187,99,.1);border:1px solid rgba(255,187,99,.18);color:#ffd8aa;font-size:.84rem}
-    .card-actions{margin-top:auto}.download-link{min-width:164px;justify-content:center}.report-list li{padding:10px 0;border-top:1px solid rgba(255,255,255,.06)}.report-list li:first-child{border-top:none;padding-top:0}
+    .progress-shell{display:none;margin-top:14px;padding:18px;border-radius:22px;border:1px solid var(--line-strong);background:linear-gradient(180deg,rgba(20,14,10,.96),rgba(10,8,6,.98));box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}
+    .progress-shell.active{display:grid;gap:14px}
+    .progress-shell[data-status=done]{border-color:rgba(255,138,42,.4)}
+    .progress-shell[data-status=done] .process-stage-rail,.progress-shell[data-status=done] .activity-panel,.progress-shell[data-status=done] .tech-panel{display:none}
+    .progress-shell[data-status=error]{border-color:rgba(255,110,72,.36)}
+    .process-head,.process-kicker,.process-meta,.activity-head,.tech-panel summary,.stem-top,.stem-ident,.stem-title-row,.stem-status,.card-actions,.report-head,.group-head,.visual-footer,.transport-row,.stem-card-head{display:flex;align-items:center}
+    .process-head,.activity-head,.tech-panel summary,.stem-top,.stem-title-row,.card-actions,.report-head,.group-head,.visual-footer,.transport-row,.stem-card-head{justify-content:space-between;gap:12px}
+    .process-kicker{gap:10px}
+    .process-pulse,.status-dot,.transport-orb{border-radius:50%}
+    .process-pulse{width:10px;height:10px;background:var(--accent);box-shadow:0 0 0 6px rgba(255,138,42,.12);animation:pulseDot 1s ease-in-out infinite}
+    .progress-shell[data-status=done] .process-pulse{animation:none}
+    .progress-shell[data-status=error] .process-pulse{background:var(--danger);box-shadow:0 0 0 6px rgba(255,110,72,.14);animation:none}
+    .process-meta{gap:6px;align-items:flex-end;flex-direction:column}
+    .process-time{font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+    .process-caption{margin:0;color:var(--muted);line-height:1.75}
+    .process-stage-rail{grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+    .process-step{display:grid;gap:8px;min-height:0;padding:12px}
+    .process-step-index{display:block;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.12em}
+    .process-step strong{font-size:.95rem}
+    .process-step small{display:block;color:var(--muted);line-height:1.55}
+    .process-step.done{border-color:rgba(255,138,42,.22);background:rgba(255,138,42,.05)}
+    .process-step.active{border-color:rgba(255,138,42,.42);background:linear-gradient(180deg,rgba(255,138,42,.12),rgba(255,138,42,.05))}
+    .activity-panel{display:grid;gap:12px;max-height:320px}
+    .activity-head strong{font-size:.96rem}
+    .activity-list{list-style:none;padding:0;margin:0;display:grid;gap:0;max-height:250px;overflow:auto}
+    .activity-list li{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:11px 0;border-top:1px solid rgba(255,255,255,.05)}
+    .activity-list li:first-child{border-top:none;padding-top:0}
+    .activity-time{font-size:.76rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);padding-top:2px}
+    .activity-copy{color:var(--text);line-height:1.6}
+    .activity-list .activity-empty{display:block;color:var(--muted);padding:2px 0;border-top:none}
+    .tech-panel{overflow:hidden;padding:0}
+    .tech-panel summary{padding:14px 15px;cursor:pointer;list-style:none}
+    .tech-panel summary::-webkit-details-marker{display:none}
+    .tech-panel[open] summary{border-bottom:1px solid rgba(255,255,255,.05)}
+    .tech-log{margin:0;padding:0 15px 15px;max-height:200px;overflow:auto;white-space:pre-wrap;color:#d7c6b2;font:400 .78rem/1.6 "IBM Plex Mono",monospace}
+    .bar{height:10px;border-radius:999px;background:#090603;border:1px solid var(--line);overflow:hidden}
+    .fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-soft));transition:width .35s ease}
+    .report{padding:24px}
+    .report-head{margin-bottom:18px}
+    .report-head h2{font-size:1.5rem}
+    .kpis{grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:20px}
+    .kpi{display:grid;gap:8px}
+    .kpi strong{display:block;font-size:1.5rem;line-height:1.05}
+    .result-group{display:grid;gap:14px;margin-top:18px}
+    .group-head h3{font-size:1.08rem;text-transform:uppercase;letter-spacing:.06em}
+    .results{gap:16px}
+    .results-primary{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .results-secondary{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+    .card{padding:20px}
+    .stem-card{display:grid;gap:16px;background:linear-gradient(180deg,rgba(22,16,12,.98),rgba(11,8,6,.98));border-radius:22px;transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease}
+    .stem-card:hover{transform:translateY(-2px);border-color:var(--line-strong)}
+    .stem-card[data-state=playing]{border-color:rgba(255,138,42,.45);box-shadow:0 18px 36px rgba(0,0,0,.26)}
+    .stem-card[data-state=loading]{border-color:rgba(255,138,42,.34)}
+    .stem-card[data-state=error]{border-color:rgba(255,110,72,.34)}
+    .stem-card-primary{border-color:rgba(255,138,42,.35);padding:22px}
+    .stem-card-secondary{padding:18px}
+    .stem-top,.stem-card-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:start;column-gap:14px;row-gap:10px}
+    .stem-copy{display:grid;gap:10px;min-width:0;align-content:start}
+    .stem-copy h3{text-transform:capitalize;font-size:clamp(1.8rem,4vw,2.45rem);line-height:.94;max-width:100%;overflow-wrap:anywhere}
+    .stem-card-secondary .stem-copy h3{font-size:1.35rem}
+    .confidence-pill{display:inline-flex;align-items:center;justify-self:start;max-width:100%;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.08);font-size:.74rem;text-transform:uppercase;letter-spacing:.08em}
+    .confidence-pill.high{background:rgba(255,138,42,.08);color:var(--accent-soft);border-color:rgba(255,138,42,.18)}
+    .confidence-pill.medium{background:rgba(255,210,161,.06);color:#ffe4c2}
+    .confidence-pill.low{background:rgba(255,110,72,.08);color:#ffc4b5}
+    .icon{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;border:1px solid rgba(255,138,42,.28);background:linear-gradient(180deg,rgba(255,138,42,.14),rgba(255,138,42,.05));color:var(--accent-soft);font-size:1.1rem;text-transform:uppercase}
+    .stem-card-secondary .icon{width:48px;height:48px;border-radius:16px;font-size:1rem}
+    .stem-status{gap:8px;color:var(--muted);font-size:.92rem;grid-column:1 / -1;min-height:1.4em}
+    .status-dot{width:10px;height:10px;background:rgba(255,255,255,.14)}
+    .stem-card[data-state=loading] .status-dot,.stem-card[data-state=playing] .status-dot{background:var(--accent);box-shadow:0 0 0 5px rgba(255,138,42,.1);animation:pulseDot .95s ease-in-out infinite}
+    .stem-card[data-state=error] .status-dot{background:var(--danger);box-shadow:0 0 0 5px rgba(255,110,72,.1);animation:none}
+    .transport-row{align-self:start;min-width:0}
+    .transport{min-width:0;justify-content:center;gap:10px;font-size:.82rem;white-space:nowrap}
+    .transport-orb{width:12px;height:12px;background:currentColor;box-shadow:0 0 0 4px rgba(255,255,255,.04)}
+    .transport[data-state=loading] .transport-orb{border:2px solid rgba(255,138,42,.32);border-top-color:currentColor;background:transparent;animation:spin .8s linear infinite}
+    .transport[data-state=playing]{background:var(--accent);color:#110904;border-color:var(--accent)}
+    .transport[data-state=error]{color:#ffc4b5;border-color:rgba(255,110,72,.28)}
+    .stem-visual{padding:14px 14px 12px;border-color:rgba(255,138,42,.1);background:linear-gradient(180deg,rgba(255,138,42,.05),rgba(255,255,255,.02))}
+    .visual-grid{height:82px;display:grid;grid-template-columns:repeat(16,1fr);align-items:end;gap:6px}
+    .stem-card-secondary .visual-grid{height:52px;grid-template-columns:repeat(14,1fr);gap:5px}
+    .visual-grid span{display:block;height:var(--bar);border-radius:999px 999px 4px 4px;background:linear-gradient(180deg,var(--accent-soft),rgba(255,138,42,.16));transform-origin:bottom center;transition:opacity .2s ease,transform .2s ease}
+    .stem-card[data-state=playing] .visual-grid span,.stem-card[data-state=loading] .visual-grid span{animation:equalize 1.25s ease-in-out infinite;animation-delay:var(--delay)}
+    .visual-footer{margin-top:12px;color:var(--muted);font-size:.82rem}
+    .visual-footer strong{display:block;color:var(--text);font-size:1rem}
+    .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .metric{display:grid;gap:0}
+    .metric strong{font-size:1.05rem;line-height:1.3}
+    .metric-wide{grid-column:1 / -1}
+    .mini-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+    .stem-inline-stat{padding:12px}
+    .stem-inline-stat strong{display:block;font-size:1rem}
+    .mini-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .stem-section{display:grid;gap:10px;padding:14px}
+    .chips{display:flex;flex-wrap:wrap;gap:8px}
+    .chip{padding:7px 11px;border-radius:999px;background:rgba(255,138,42,.08);border:1px solid rgba(255,138,42,.16);color:var(--accent-soft);font-size:.82rem;line-height:1.4}
+    .chip[data-tone=muted]{background:rgba(255,255,255,.02);border-color:rgba(255,255,255,.08);color:var(--muted)}
+    .card-actions{margin-top:auto}
+    .download-link{justify-content:center;min-width:0}
+    .report-list{list-style:none;padding:0;margin:16px 0 0}
+    .report-list li{padding:11px 0;border-top:1px solid rgba(255,255,255,.06);color:var(--muted);line-height:1.7}
+    .report-list li strong{color:var(--text)}
+    .report-list li:first-child{border-top:none;padding-top:0}
+    .full-report-card{margin-top:22px;background:linear-gradient(180deg,rgba(255,138,42,.05),rgba(255,255,255,.015));border-color:rgba(255,138,42,.18)}
+    .status-error{color:var(--danger)}
     @keyframes spin{to{transform:rotate(360deg)}}@keyframes pulseDot{50%{transform:scale(1.18)}}@keyframes equalize{0%,100%{transform:scaleY(.72)}50%{transform:scaleY(1.08)}}
-    .report{margin-top:18px;padding:22px}.report-list{list-style:none;padding:0;margin:14px 0 0}.status-error{color:var(--danger)}audio{width:100%;margin-top:12px}
-    @media (max-width:780px){.hero-grid,.kpis{grid-template-columns:1fr}.shell{width:min(100% - 20px,1100px)}.hero{padding:22px}}
+    @media (max-width:1080px){.hero-grid,.results-primary,.kpis,.mini-stats{grid-template-columns:1fr}.results-secondary{grid-template-columns:repeat(2,minmax(0,1fr))}.process-stage-rail{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:780px){.shell{width:min(100% - 18px,1240px);margin:18px auto 40px}.hero{padding:22px}.results-secondary,.trim-metrics,.stat-grid,.mini-meta{grid-template-columns:1fr}.process-stage-rail{grid-template-columns:1fr}.process-head,.report-head,.group-head,.visual-footer,.preview-transport,.preview-toolbar{align-items:flex-start;flex-direction:column}.process-meta{align-items:flex-start}.stem-top,.stem-card-head,.transport-row{align-items:flex-start;flex-direction:column}.transport,.download-link,.preview-play,.preview-toggle,.preview-seek{width:100%}.stem-copy h3{font-size:1.7rem}.hero p{line-height:1.7}}
   </style>
 </head>
 <body>
@@ -59,53 +182,101 @@
     <section class="hero">
       <div class="eyebrow">AI Production Analyzer</div>
       <h1>TrackDissect</h1>
-      <p>Upload a rough bounce, split it into stems, inspect its sonic profile, and turn audio features into a fast production breakdown built for reference hunting.</p>
+      <p>Upload a rough bounce, split it into vocals, instrumental, and detailed stems, inspect its sonic profile, and turn audio features into a fast production breakdown built for reference hunting.</p>
       <div class="hero-grid">
         <section class="panel upload">
           <div class="dropzone">
             <strong>Upload MP3, WAV, AAC, or M4A</strong>
-            <div class="fine">Single file, up to 10MB. Waveform preview appears before analysis.</div>
+            <div class="fine">Single file, up to 10MB. Waveform preview appears before analysis, then vocals and instrumental exports are generated alongside detailed stems.</div>
           </div>
           <input id="fileInput" type="file" accept=".mp3,.wav,.aac,.m4a,audio/mpeg,audio/wav,audio/aac,audio/mp4,audio/x-m4a,audio/mp4a-latm">
           <button id="analyzeBtn">Analyze Track</button>
           <div id="message" class="fine">Waiting for audio.</div>
-          <div id="progressShell" class="progress-shell">
-            <div class="meta"><strong id="progressLabel">Processing</strong><span id="progressValue">0%</span></div>
+          <div id="progressShell" class="progress-shell" data-status="idle">
+            <div class="process-head">
+              <div>
+                <div class="process-kicker"><span class="process-pulse"></span><span id="processStage" class="eyebrow">Queued</span></div>
+                <strong id="progressLabel">Processing</strong>
+              </div>
+              <div class="process-meta"><strong id="progressValue">0%</strong><span id="processElapsed" class="process-time">00:00</span></div>
+            </div>
+            <p id="progressCaption" class="process-caption">Demucs can take a little while. Keep this tab open while the separation runs.</p>
             <div class="bar"><div id="progressFill" class="fill"></div></div>
+            <div id="processStageRail" class="process-stage-rail"></div>
+            <div class="activity-panel">
+              <div class="activity-head"><strong>Live activity</strong><span class="muted">Newest first</span></div>
+              <ul id="processActivity" class="activity-list"></ul>
+            </div>
+            <details id="technicalPanel" class="tech-panel">
+              <summary><span>Technical log</span><span id="technicalSummary" class="muted">Waiting for Demucs output</span></summary>
+              <pre id="technicalLog" class="tech-log">Technical details will appear here when the separator reports them.</pre>
+            </details>
           </div>
         </section>
         <section class="panel">
           <div class="meta"><div><strong id="fileName">No file selected</strong><span id="fileMeta">Load a short track to preview the waveform.</span></div><span class="eyebrow">Preview</span></div>
-          <canvas id="waveform" width="900" height="280"></canvas>
-          <audio id="sourcePreview" controls style="display:none"></audio>
+          <div class="waveform-shell">
+            <canvas id="waveform" width="900" height="280"></canvas>
+            <div id="trimSlider" class="waveform-surface" aria-label="Detection trim window">
+              <div id="trimSelection" class="trim-selection" role="slider" aria-label="Trim range"></div>
+              <button id="trimStartHandle" class="trim-handle" type="button" aria-label="Trim start" disabled></button>
+              <button id="trimEndHandle" class="trim-handle" type="button" aria-label="Trim end" disabled></button>
+            </div>
+          </div>
+          <audio id="sourcePreview" class="source-audio"></audio>
+          <div class="preview-transport">
+            <button id="previewPlayBtn" class="preview-play" type="button" disabled>Play</button>
+            <div class="preview-timecode"><strong id="previewCurrentTime">00:00</strong><span id="previewTotalTime">/ 00:00</span></div>
+            <div id="previewSeekBar" class="preview-seek" data-disabled="true" aria-label="Preview seek">
+              <div id="previewSeekFill" class="preview-seek-fill"></div>
+              <div id="previewSeekThumb" class="preview-seek-thumb"></div>
+            </div>
+            <button id="previewLoopToggle" class="ghost preview-toggle" type="button" aria-pressed="false" disabled>Loop: Off</button>
+          </div>
+          <div class="preview-toolbar">
+            <span class="muted">Trim directly on the waveform. Drag the band or either edge.</span>
+            <span class="muted shortcut-hint">Space = Play / Pause</span>
+          </div>
           <div class="trim-box">
             <div class="meta"><div><strong>Detection Window</strong><span id="trimSummary">Choose the section of the song that should be analyzed.</span></div><span class="eyebrow">Trim</span></div>
             <div class="trim-metrics">
               <div><span class="muted">Start</span><strong id="trimStartValue">0.0s</strong></div>
               <div><span class="muted">End</span><strong id="trimEndValue">0.0s</strong></div>
+              <div><span class="muted">Selected</span><strong id="trimLength">0.0s</strong></div>
             </div>
-            <div class="trim-note">Drag the left or right edge to trim. Playback follows the selected window. Drag the center band to move the whole range.</div>
-            <div class="trim-ruler"><strong>0.0s</strong><span id="trimMidpoint">0.0s</span><strong id="trimDurationLabel">0.0s</strong></div>
-            <div id="trimSlider" class="trim-slider" aria-label="Detection trim window">
-              <div class="trim-track"></div>
-              <div id="trimSelection" class="trim-selection" role="slider" aria-label="Trim range"></div>
-              <button id="trimStartHandle" class="trim-handle" type="button" aria-label="Trim start" disabled></button>
-              <button id="trimEndHandle" class="trim-handle" type="button" aria-label="Trim end" disabled></button>
-            </div>
-            <div class="trim-readout" style="margin-top:12px"><strong id="trimWindow">0.0s - 0.0s</strong><span id="trimLength" class="muted">Selected length: 0.0s</span></div>
+            <div class="trim-note">Playback follows the selected window. Loop uses only this region, and the waveform playhead shows the live position.</div>
           </div>
         </section>
       </div>
     </section>
 
-    <section class="panel report" style="margin-top:18px">
-      <div class="eyebrow">Session Readout</div>
+    <section class="panel report">
+      <div class="report-head">
+        <div>
+          <div class="eyebrow">Session Readout</div>
+          <h2>Analysis Outputs</h2>
+        </div>
+        <div class="muted">Vocals and instrumental stay primary. Supporting stems stay compact.</div>
+      </div>
       <div class="kpis" id="kpis">
         <div class="kpi"><div class="kpi-label">Status</div><strong id="statusKpi">Idle</strong></div>
         <div class="kpi"><div class="kpi-label">Detected BPM</div><strong id="bpmKpi">--</strong></div>
         <div class="kpi"><div class="kpi-label">Genre Guess</div><strong id="genreKpi">--</strong></div>
       </div>
-      <div id="results" class="results"></div>
+      <section id="prioritySection" class="result-group" style="display:none">
+        <div class="group-head">
+          <h3>Main Exports</h3>
+          <span class="muted">Best starting point for review and download</span>
+        </div>
+        <div id="priorityResults" class="results results-primary"></div>
+      </section>
+      <section id="secondarySection" class="result-group" style="display:none">
+        <div class="group-head">
+          <h3>Detailed Stems</h3>
+          <span class="muted">Secondary layers for closer arrangement inspection</span>
+        </div>
+        <div id="secondaryResults" class="results results-secondary"></div>
+      </section>
       <div id="fullReport"></div>
     </section>
   </main>
@@ -132,7 +303,20 @@
       waveformLayer: null,
       waveformFrame: 0,
       previewFrame: 0,
+      previewSeeking: false,
+      previewSeekBounds: null,
+      processClock: 0,
+      processBaseTime: 0,
+      loopPreview: false,
     };
+    const PROCESS_STAGES = [
+      { key: 'prepare', label: 'Prepare clip', hint: 'Render the selected window.' },
+      { key: 'features', label: 'Read track', hint: 'Estimate tempo, key, and level.' },
+      { key: 'separate', label: 'Split audio', hint: 'Demucs isolates vocals and accompaniment.' },
+      { key: 'analyze', label: 'Inspect stems', hint: 'Measure each separated output.' },
+      { key: 'report', label: 'Write report', hint: 'Summarize the result.' },
+    ];
+    const SESSION_KEY = 'trackdissect:last-session';
     const fileInput = document.getElementById('fileInput');
     const analyzeBtn = document.getElementById('analyzeBtn');
     const message = document.getElementById('message');
@@ -140,11 +324,29 @@
     const progressFill = document.getElementById('progressFill');
     const progressValue = document.getElementById('progressValue');
     const progressLabel = document.getElementById('progressLabel');
+    const processStage = document.getElementById('processStage');
+    const processElapsed = document.getElementById('processElapsed');
+    const progressCaption = document.getElementById('progressCaption');
+    const processStageRail = document.getElementById('processStageRail');
+    const processActivity = document.getElementById('processActivity');
+    const technicalPanel = document.getElementById('technicalPanel');
+    const technicalSummary = document.getElementById('technicalSummary');
+    const technicalLog = document.getElementById('technicalLog');
     const fileName = document.getElementById('fileName');
     const fileMeta = document.getElementById('fileMeta');
     const waveform = document.getElementById('waveform');
     const sourcePreview = document.getElementById('sourcePreview');
-    const results = document.getElementById('results');
+    const previewPlayBtn = document.getElementById('previewPlayBtn');
+    const previewCurrentTime = document.getElementById('previewCurrentTime');
+    const previewTotalTime = document.getElementById('previewTotalTime');
+    const previewSeekBar = document.getElementById('previewSeekBar');
+    const previewSeekFill = document.getElementById('previewSeekFill');
+    const previewSeekThumb = document.getElementById('previewSeekThumb');
+    const previewLoopToggle = document.getElementById('previewLoopToggle');
+    const prioritySection = document.getElementById('prioritySection');
+    const secondarySection = document.getElementById('secondarySection');
+    const priorityResults = document.getElementById('priorityResults');
+    const secondaryResults = document.getElementById('secondaryResults');
     const fullReport = document.getElementById('fullReport');
     const statusKpi = document.getElementById('statusKpi');
     const bpmKpi = document.getElementById('bpmKpi');
@@ -156,18 +358,22 @@
     const trimStartValue = document.getElementById('trimStartValue');
     const trimEndValue = document.getElementById('trimEndValue');
     const trimSummary = document.getElementById('trimSummary');
-    const trimWindow = document.getElementById('trimWindow');
     const trimLength = document.getElementById('trimLength');
-    const trimMidpoint = document.getElementById('trimMidpoint');
-    const trimDurationLabel = document.getElementById('trimDurationLabel');
     state.player.preload = 'auto';
 
     fileInput.addEventListener('change', async (event) => {
-      state.file = event.target.files[0];
-      if (!state.file) return;
-      if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
+      const nextFile = event.target.files?.[0];
+      if (!nextFile) {
+        if (state.file) setMessage('File dialog was cancelled. Keeping the current preview.');
+        return;
+      }
+      state.file = nextFile;
+      clearStoredSession();
+      state.jobId = null;
+      releasePreviewUrl();
       resetStemPlayback();
       clearStemCache();
+      resetProcessingUI();
       stopPreviewMonitor();
       sourcePreview.pause();
       resetTrimState();
@@ -176,28 +382,37 @@
       clearInterval(state.poller);
       state.previewUrl = URL.createObjectURL(state.file);
       sourcePreview.src = state.previewUrl;
-      sourcePreview.style.display = 'block';
       try {
         await loadPreview(state.file);
         setMessage(state.buffer ? 'Waveform ready. Preview now follows the selected trim window.' : 'Preview loaded. Browser waveform decode is unavailable for this file, but trim playback still follows your selection.');
       } catch (error) {
         setMessage(error.message || 'Audio preview is unavailable, but you can still analyze the file.', true);
       }
+      if (document.activeElement === fileInput) fileInput.blur();
     });
     trimStartHandle.addEventListener('pointerdown', (event) => beginTrimDrag(event, 'start'));
     trimEndHandle.addEventListener('pointerdown', (event) => beginTrimDrag(event, 'end'));
-    trimSelection.addEventListener('pointerdown', (event) => beginTrimDrag(event, 'selection'));
+    trimSelection.addEventListener('pointerdown', handleTrimSelectionPointerDown);
     trimSlider.addEventListener('pointerdown', trimSliderPointerDown);
     trimStartHandle.addEventListener('keydown', (event) => trimHandleKeydown(event, 'start'));
     trimEndHandle.addEventListener('keydown', (event) => trimHandleKeydown(event, 'end'));
+    previewPlayBtn.addEventListener('click', togglePreviewPlayback);
+    previewSeekBar.addEventListener('pointerdown', beginPreviewSeek);
+    previewLoopToggle.addEventListener('click', togglePreviewLoop);
     window.addEventListener('pointermove', onTrimPointerMove);
+    window.addEventListener('pointermove', onPreviewSeekMove);
     window.addEventListener('pointerup', endTrimDrag);
+    window.addEventListener('pointerup', endPreviewSeek);
     window.addEventListener('pointercancel', endTrimDrag);
-    sourcePreview.addEventListener('loadedmetadata', () => syncPreviewToTrim(true));
+    window.addEventListener('pointercancel', endPreviewSeek);
+    window.addEventListener('keydown', handleGlobalKeydown);
+    sourcePreview.addEventListener('loadedmetadata', handlePreviewLoadedMetadata);
     sourcePreview.addEventListener('play', handlePreviewPlay);
-    sourcePreview.addEventListener('pause', stopPreviewMonitor);
+    sourcePreview.addEventListener('pause', handlePreviewPause);
     sourcePreview.addEventListener('ended', handlePreviewEnded);
     sourcePreview.addEventListener('seeking', handlePreviewSeeking);
+    sourcePreview.addEventListener('seeked', scheduleWaveformDraw);
+    sourcePreview.addEventListener('timeupdate', scheduleWaveformDraw);
     state.player.addEventListener('loadstart', handleStemLoadStart);
     state.player.addEventListener('waiting', handleStemWaiting);
     state.player.addEventListener('canplay', handleStemCanPlay);
@@ -211,9 +426,13 @@
       analyzeBtn.disabled = true;
       resetStemPlayback();
       clearStemCache();
+      resetProcessingUI();
       setMessage('Uploading audio...');
       statusKpi.textContent = 'Queued';
-      results.innerHTML = '';
+      prioritySection.style.display = 'none';
+      secondarySection.style.display = 'none';
+      priorityResults.innerHTML = '';
+      secondaryResults.innerHTML = '';
       fullReport.innerHTML = '';
       const formData = new FormData();
       formData.append('file', state.file);
@@ -224,6 +443,7 @@
         const data = await response.json();
         if (!response.ok) throw new Error(data.detail || 'Upload failed.');
         state.jobId = data.job_id;
+        storeSession({ jobId: data.job_id });
         beginPolling();
       } catch (error) {
         analyzeBtn.disabled = false;
@@ -234,45 +454,70 @@
     function beginPolling() {
       clearInterval(state.poller);
       progressShell.classList.add('active');
-      updateProgress(5, 'Upload received');
-      state.poller = setInterval(checkStatus, 2000);
+      renderProcessingState({ status: 'queued', stage: 'queue', progress: 5, message: 'Upload received.', activity: [{ at: new Date().toISOString(), phase: 'queue', text: 'Upload accepted. Waiting for the background worker to begin.' }], technical_logs: [] });
+      state.poller = setInterval(checkStatus, 1000);
       checkStatus();
     }
 
     async function checkStatus() {
-      const response = await fetch(`/status/${state.jobId}`);
-      const data = await response.json();
-      updateProgress(data.progress, data.message);
-      statusKpi.textContent = data.status;
-      if (data.status === 'done') {
+      try {
+        const response = await fetch(`/status/${state.jobId}`);
+        const data = await response.json();
+        if (response.status === 404) {
+          clearStoredSession();
+          throw new Error('Saved session is no longer available.');
+        }
+        if (!response.ok) throw new Error(data.detail || 'Unable to read job status.');
+        storeSession({ jobId: state.jobId });
+        renderProcessingState(data);
+        statusKpi.textContent = capitalize(data.status);
+        if (data.status === 'done') {
+          clearInterval(state.poller);
+          analyzeBtn.disabled = false;
+          setMessage('Analysis complete.');
+          stopProcessClock();
+          await loadResults();
+        }
+        if (data.status === 'error') {
+          clearInterval(state.poller);
+          analyzeBtn.disabled = false;
+          stopProcessClock();
+          storeSession({ jobId: state.jobId });
+          setMessage(data.message || 'Processing failed.', true);
+        }
+      } catch (error) {
         clearInterval(state.poller);
         analyzeBtn.disabled = false;
-        setMessage('Analysis complete.');
-        loadResults();
-      }
-      if (data.status === 'error') {
-        clearInterval(state.poller);
-        analyzeBtn.disabled = false;
-        setMessage(data.message || 'Processing failed.', true);
+        progressShell.dataset.status = 'error';
+        stopProcessClock();
+        setMessage(error.message || 'Status polling failed.', true);
       }
     }
 
     async function loadResults() {
       const response = await fetch(`/results/${state.jobId}`);
       const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || 'Unable to load results.');
       bpmKpi.textContent = data.track_features?.bpm || '--';
-      genreKpi.textContent = data.full_report.genre_guess || '--';
+      genreKpi.textContent = capitalizeWords(data.full_report.genre_guess || '--');
       const selection = data.selection ? `<li><strong>Analyzed section:</strong> ${formatSeconds(data.selection.start_seconds)} - ${formatSeconds(data.selection.end_seconds)} (${formatSeconds(data.selection.duration_seconds)})</li>` : '';
       resetStemPlayback();
       clearStemCache();
-      results.innerHTML = Object.entries(data.stems).map(([stem, info]) => renderStemCard(stem, info)).join('');
+      const entries = Object.entries(data.stems);
+      const primaryOrder = ['vocals', 'instrumental'];
+      const primary = primaryOrder.map((name) => entries.find(([stem]) => stem === name)).filter(Boolean);
+      const secondary = entries.filter(([stem]) => !primaryOrder.includes(stem));
+      prioritySection.style.display = primary.length ? 'grid' : 'none';
+      secondarySection.style.display = secondary.length ? 'grid' : 'none';
+      priorityResults.innerHTML = primary.map(([stem, info]) => renderStemCard(stem, info, 'primary')).join('');
+      secondaryResults.innerHTML = secondary.map(([stem, info]) => renderStemCard(stem, info, 'secondary')).join('');
       fullReport.innerHTML = `
-        <section class="card" style="margin-top:18px">
+        <section class="card full-report-card">
           <div class="eyebrow">Full Production Report</div>
-          <h2 style="margin-top:8px">${data.full_report.production_style}</h2>
+          <h2 style="margin-top:10px">${capitalizeWords(data.full_report.production_style)}</h2>
           <ul class="report-list">
             ${selection}
-            <li><strong>Genre guess:</strong> ${data.full_report.genre_guess}</li>
+            <li><strong>Genre guess:</strong> ${capitalizeWords(data.full_report.genre_guess)}</li>
             <li><strong>Notable techniques:</strong> ${data.full_report.notable_techniques.join(', ')}</li>
             <li><strong>Reference artists:</strong> ${data.full_report.similar_artists.join(', ')}</li>
           </ul>
@@ -282,67 +527,116 @@
         button.addEventListener('mouseenter', () => warmStem(button.dataset.url));
         button.addEventListener('focus', () => warmStem(button.dataset.url));
       });
+      storeSession({ jobId: state.jobId });
     }
 
-    function renderStemCard(stem, info) {
-      const range = `${info.features.frequency_range.low_hz}-${info.features.frequency_range.high_hz}Hz`;
+    function renderStemCard(stem, info, variant = 'secondary') {
+      const isPrimary = variant === 'primary';
+      const label = capitalizeWords(stem.replace(/_/g, ' '));
+      const range = `${info.features.frequency_range.low_hz}-${info.features.frequency_range.high_hz} Hz`;
       const energy = capitalize(info.features.energy_level);
-      const bars = buildStemBars(stem, info.features);
-      const instruments = info.analysis.detected_instruments.map((item) => `<span class="chip">${item}</span>`).join('');
-      const fx = info.analysis.likely_fx.map((item) => `<span class="chip">${item}</span>`).join('');
-      return `
-        <article class="card stem-card" data-state="idle" data-stem="${stem}">
-          <div class="stem-top">
-            <div class="stem-ident">
+      const bars = buildStemBars(stem, info.features, isPrimary ? 16 : 14);
+      const instruments = renderChipList(info.analysis.detected_instruments, isPrimary ? 3 : 2);
+      const fx = renderChipList(info.analysis.likely_fx, isPrimary ? 3 : 2);
+      const transport = `
+        <button class="ghost transport play-btn" data-url="${info.preview_url}" data-state="idle">
+          <span class="transport-orb"></span>
+          <span class="transport-label">Play</span>
+        </button>`;
+      if (isPrimary) {
+        return `
+          <article class="card stem-card stem-card-primary" data-state="idle" data-stem="${stem}">
+            <div class="stem-top">
               <div class="icon">${info.icon}</div>
               <div class="stem-copy">
-                <div class="stem-title-row">
-                  <h3>${stem}</h3>
-                  <span class="confidence-pill ${info.analysis.confidence}">${info.analysis.confidence} confidence</span>
-                </div>
-                <div class="stem-status">
-                  <span class="status-dot"></span>
-                  <span class="stem-status-copy">Ready to preview</span>
-                </div>
+                <h3>${label}</h3>
+                <span class="confidence-pill ${info.analysis.confidence}">${info.analysis.confidence} confidence</span>
+              </div>
+              <div class="transport-row">${transport}</div>
+              <div class="stem-status">
+                <span class="status-dot"></span>
+                <span class="stem-status-copy">Ready to preview</span>
               </div>
             </div>
-            <button class="ghost transport play-btn" data-url="${info.preview_url}" data-state="idle">
-              <span class="transport-orb"></span>
-              <span class="transport-label">Play stem</span>
-            </button>
+            <div class="stem-visual">
+              <div class="visual-grid">${bars}</div>
+              <div class="visual-footer">
+                <div><span>Detected key</span><strong>${info.features.key}</strong></div>
+                <div><span>Duration</span><strong>${formatSeconds(info.features.duration_seconds)}</strong></div>
+              </div>
+            </div>
+            <div class="stat-grid">
+              <div class="metric"><span>BPM</span><strong>${info.features.bpm}</strong></div>
+              <div class="metric"><span>Energy</span><strong>${energy}</strong></div>
+              <div class="metric"><span>Key</span><strong>${info.features.key}</strong></div>
+              <div class="metric"><span>Duration</span><strong>${formatSeconds(info.features.duration_seconds)}</strong></div>
+              <div class="metric metric-wide"><span>Frequency range</span><strong>${range}</strong></div>
+            </div>
+            <div class="stem-section">
+              <div class="section-label">Detected instruments</div>
+              <div class="chips">${instruments}</div>
+            </div>
+            <div class="stem-section">
+              <div class="section-label">Likely FX</div>
+              <div class="chips">${fx}</div>
+            </div>
+            <div class="card-actions">
+              <a class="ghost download-link" href="${info.download_url}" download>Download ${label}</a>
+            </div>
+          </article>`;
+      }
+      return `
+        <article class="card stem-card stem-card-secondary" data-state="idle" data-stem="${stem}">
+          <div class="stem-card-head">
+            <div class="icon">${info.icon}</div>
+            <div class="stem-copy">
+              <h3>${label}</h3>
+              <span class="confidence-pill ${info.analysis.confidence}">${info.analysis.confidence} confidence</span>
+            </div>
+            ${transport}
+            <div class="stem-status">
+              <span class="status-dot"></span>
+              <span class="stem-status-copy">Ready to preview</span>
+            </div>
+          </div>
+          <div class="mini-meta">
+            <div class="stem-inline-stat"><span>BPM</span><strong>${info.features.bpm}</strong></div>
+            <div class="stem-inline-stat"><span>Energy</span><strong>${energy}</strong></div>
+            <div class="stem-inline-stat"><span>Key</span><strong>${info.features.key}</strong></div>
           </div>
           <div class="stem-visual">
             <div class="visual-grid">${bars}</div>
             <div class="visual-footer">
-              <div><span class="muted">Detected key</span><strong>${info.features.key}</strong></div>
-              <div><span class="muted">Energy profile</span><strong>${energy}</strong></div>
+              <div><span>Range</span><strong>${range}</strong></div>
+              <div><span>Length</span><strong>${formatSeconds(info.features.duration_seconds)}</strong></div>
             </div>
           </div>
-          <div class="stat-grid">
-            <div class="metric"><span>BPM</span><strong>${info.features.bpm}</strong></div>
-            <div class="metric"><span>Duration</span><strong>${formatSeconds(info.features.duration_seconds)}</strong></div>
-            <div class="metric"><span>Energy</span><strong>${energy}</strong></div>
-            <div class="metric"><span>Key</span><strong>${info.features.key}</strong></div>
-            <div class="metric metric-wide"><span>Frequency range</span><strong>${range}</strong></div>
-          </div>
-          <div>
+          <div class="stem-section">
             <div class="section-label">Detected instruments</div>
-            <div class="chips" style="margin-top:10px">${instruments}</div>
+            <div class="chips">${instruments}</div>
           </div>
-          <div>
+          <div class="stem-section">
             <div class="section-label">Likely FX</div>
-            <div class="chips" style="margin-top:10px">${fx}</div>
+            <div class="chips">${fx}</div>
           </div>
           <div class="card-actions">
-            <a class="ghost download-link" href="${info.download_url}" download>Download stem</a>
+            <a class="ghost download-link" href="${info.download_url}" download>Download</a>
           </div>
         </article>`;
     }
 
-    function buildStemBars(stem, features) {
+    function renderChipList(items, maxVisible = 3) {
+      const list = Array.isArray(items) ? items.filter(Boolean) : [];
+      if (!list.length) return '<span class="chip" data-tone="muted">No signal yet</span>';
+      const visible = list.slice(0, maxVisible).map((item) => `<span class="chip">${item}</span>`).join('');
+      const extra = list.length > maxVisible ? `<span class="chip" data-tone="muted">+${list.length - maxVisible} more</span>` : '';
+      return `${visible}${extra}`;
+    }
+
+    function buildStemBars(stem, features, count = 16) {
       const seed = [...stem].reduce((sum, char) => sum + char.charCodeAt(0), 0);
       const base = clamp((features.rms_energy || 0) * 600, 18, 82);
-      return Array.from({ length: 18 }, (_, index) => {
+      return Array.from({ length: count }, (_, index) => {
         const wave = Math.sin((index + 1 + seed / 7) * 0.82) * 12;
         const tilt = (features.spectral_centroid || 0) / 450;
         const height = clamp(base + wave + tilt + (index % 4) * 4, 16, 94);
@@ -506,10 +800,161 @@
       state.stemCache = {};
     }
 
-    function updateProgress(value, label) {
-      progressFill.style.width = `${value}%`;
-      progressValue.textContent = `${value}%`;
-      progressLabel.textContent = label;
+    function renderProcessingState(data) {
+      const stageKey = resolveProcessStage(data);
+      const stageConfig = processStageConfig(stageKey, data.status);
+      progressShell.classList.add('active');
+      progressShell.dataset.status = data.status || 'processing';
+      progressFill.style.width = `${data.progress || 0}%`;
+      progressValue.textContent = `${data.progress || 0}%`;
+      progressLabel.textContent = data.message || 'Processing';
+      processStage.textContent = stageConfig.badge;
+      progressCaption.textContent = stageConfig.hint;
+      renderProcessStages(stageKey, data.status);
+      renderProcessActivity(data.activity || [], data.started_at || data.created_at);
+      renderTechnicalLog(data.technical_logs || []);
+      if (data.status === 'error' && (data.technical_logs || []).length) technicalPanel.open = true;
+      syncProcessClock(data.started_at || data.created_at, data.status);
+    }
+
+    function resolveProcessStage(data) {
+      if (PROCESS_STAGES.some((step) => step.key === data.stage)) return data.stage;
+      const activity = [...(data.activity || [])].reverse();
+      const fallback = activity.find((entry) => PROCESS_STAGES.some((step) => step.key === entry.phase));
+      if (fallback) return fallback.phase;
+      return data.status === 'done' ? 'report' : 'prepare';
+    }
+
+    function processStageConfig(stageKey, status) {
+      if (status === 'done') {
+        return { badge: 'Ready', hint: 'Everything is complete. Vocals, instrumental, and the report are ready below.' };
+      }
+      if (status === 'error') {
+        return { badge: 'Attention', hint: 'Processing stopped before completion. Open the technical log if you need the Demucs details.' };
+      }
+      if (stageKey === 'queue') {
+        return { badge: 'Queued', hint: 'Your upload is already in the worker queue. The preparation step will start shortly.' };
+      }
+      const step = PROCESS_STAGES.find((item) => item.key === stageKey);
+      return { badge: step ? step.label : 'Processing', hint: step ? step.hint : 'The analysis pipeline is still running.' };
+    }
+
+    function renderProcessStages(stageKey, status) {
+      const currentIndex = PROCESS_STAGES.findIndex((step) => step.key === stageKey);
+      processStageRail.innerHTML = PROCESS_STAGES.map((step, index) => {
+        const stateClass = status === 'done'
+          ? 'done'
+          : currentIndex === -1
+            ? ''
+            : index < currentIndex
+              ? 'done'
+              : index === currentIndex && status === 'processing'
+                ? 'active'
+                : '';
+        return `
+          <div class="process-step ${stateClass}">
+            <span class="process-step-index">Step ${index + 1}</span>
+            <strong>${step.label}</strong>
+            <small>${step.hint}</small>
+          </div>`;
+      }).join('');
+    }
+
+    function renderProcessActivity(entries, baseTime) {
+      if (!entries.length) {
+        processActivity.innerHTML = '<li class="activity-empty">Waiting for the worker to publish activity.</li>';
+        return;
+      }
+      processActivity.innerHTML = [...entries].reverse().map((entry) => `
+        <li>
+          <span class="activity-time">${formatProcessOffset(entry.at, baseTime)}</span>
+          <span class="activity-copy">${entry.text}</span>
+        </li>`).join('');
+    }
+
+    function renderTechnicalLog(lines) {
+      if (!lines.length) {
+        technicalSummary.textContent = 'Waiting for Demucs output';
+        technicalLog.textContent = 'Technical details will appear here when the separator reports them.';
+        technicalPanel.open = false;
+        return;
+      }
+      technicalSummary.textContent = `${lines.length} lines captured`;
+      technicalLog.textContent = lines.map((entry) => `[${formatProcessOffset(entry.at)}] ${entry.text}`).join('\n');
+      technicalLog.scrollTop = technicalLog.scrollHeight;
+    }
+
+    function resetProcessingUI() {
+      clearInterval(state.poller);
+      state.poller = null;
+      stopProcessClock();
+      progressShell.classList.remove('active');
+      progressShell.dataset.status = 'idle';
+      progressFill.style.width = '0%';
+      progressValue.textContent = '0%';
+      progressLabel.textContent = 'Processing';
+      processStage.textContent = 'Queued';
+      progressCaption.textContent = 'Demucs can take a little while. Keep this tab open while the separation runs.';
+      processStageRail.innerHTML = PROCESS_STAGES.map((step, index) => `
+        <div class="process-step">
+          <span class="process-step-index">Step ${index + 1}</span>
+          <strong>${step.label}</strong>
+          <small>${step.hint}</small>
+        </div>`).join('');
+      processActivity.innerHTML = '<li class="activity-empty">Activity will appear here once processing starts.</li>';
+      technicalSummary.textContent = 'Waiting for Demucs output';
+      technicalLog.textContent = 'Technical details will appear here when the separator reports them.';
+      technicalPanel.open = false;
+      processElapsed.textContent = '00:00';
+    }
+
+    function syncProcessClock(baseTime, status) {
+      const nextBase = baseTime ? Date.parse(baseTime) : 0;
+      if (!nextBase) {
+        stopProcessClock();
+        processElapsed.textContent = '00:00';
+        return;
+      }
+      state.processBaseTime = nextBase;
+      updateProcessElapsed();
+      if (status === 'processing' || status === 'queued') {
+        if (state.processClock) return;
+        state.processClock = setInterval(updateProcessElapsed, 1000);
+      } else {
+        stopProcessClock();
+      }
+    }
+
+    function stopProcessClock() {
+      if (!state.processClock) return;
+      clearInterval(state.processClock);
+      state.processClock = 0;
+    }
+
+    function updateProcessElapsed() {
+      if (!state.processBaseTime) {
+        processElapsed.textContent = '00:00';
+        return;
+      }
+      const seconds = Math.max(0, Math.floor((Date.now() - state.processBaseTime) / 1000));
+      processElapsed.textContent = formatClock(seconds);
+    }
+
+    function formatProcessOffset(at, baseTime = null) {
+      const current = at ? Date.parse(at) : 0;
+      const base = baseTime ? Date.parse(baseTime) : state.processBaseTime;
+      if (!current || !base) return '+00:00';
+      return `+${formatClock(Math.max(0, Math.round((current - base) / 1000)))}`;
+    }
+
+    function formatClock(totalSeconds) {
+      const seconds = Math.max(0, Number(totalSeconds || 0));
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const remainder = seconds % 60;
+      return hours
+        ? `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(remainder).padStart(2, '0')}`
+        : `${String(minutes).padStart(2, '0')}:${String(remainder).padStart(2, '0')}`;
     }
 
     function setMessage(text, isError = false) {
@@ -517,17 +962,113 @@
       message.className = isError ? 'status-error' : 'fine';
     }
 
-    async function loadPreview(file) {
+    function storeSession(payload) {
+      try {
+        if (!payload?.jobId) {
+          sessionStorage.removeItem(SESSION_KEY);
+          return;
+        }
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify({ jobId: payload.jobId }));
+      } catch (error) {
+        return;
+      }
+    }
+
+    function readStoredSession() {
+      try {
+        const value = sessionStorage.getItem(SESSION_KEY);
+        return value ? JSON.parse(value) : null;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function clearStoredSession() {
+      try {
+        sessionStorage.removeItem(SESSION_KEY);
+      } catch (error) {
+        return;
+      }
+    }
+
+    function releasePreviewUrl() {
+      if (state.previewUrl && state.previewUrl.startsWith('blob:')) URL.revokeObjectURL(state.previewUrl);
+      state.previewUrl = null;
+    }
+
+    async function restoreStoredSession() {
+      const saved = readStoredSession();
+      if (!saved?.jobId) return;
+      try {
+        const response = await fetch(`/status/${saved.jobId}`);
+        const data = await response.json();
+        if (response.status === 404) {
+          clearStoredSession();
+          return;
+        }
+        if (!response.ok) throw new Error(data.detail || 'Unable to restore the saved session.');
+        state.jobId = saved.jobId;
+        statusKpi.textContent = capitalize(data.status);
+        await restorePreviewFromSession(data);
+        renderProcessingState(data);
+        if (data.status === 'processing' || data.status === 'queued') {
+          analyzeBtn.disabled = true;
+          clearInterval(state.poller);
+          state.poller = setInterval(checkStatus, 1000);
+          setMessage('Restored the active analysis session.');
+          return;
+        }
+        analyzeBtn.disabled = false;
+        if (data.status === 'done') {
+          await loadResults();
+          setMessage('Restored the previous analysis session.');
+          return;
+        }
+        if (data.status === 'error') {
+          setMessage(data.message || 'Restored the last session. Processing had stopped earlier.', true);
+          return;
+        }
+        setMessage('Restored the previous session.');
+      } catch (error) {
+        clearStoredSession();
+        setMessage(error.message || 'Saved session could not be restored.', true);
+      }
+    }
+
+    async function restorePreviewFromSession(session) {
+      releasePreviewUrl();
+      stopPreviewMonitor();
+      sourcePreview.pause();
+      resetTrimState();
+      fileName.textContent = session.filename || 'Restored upload';
+      fileMeta.textContent = session.file_size_bytes ? formatFileSize(session.file_size_bytes) : 'Restored from last session';
+      if (!session.source_url) {
+        setMessage('Session restored, but source preview is unavailable. Re-select a local file if you need a fresh upload.');
+        return;
+      }
+      state.previewUrl = session.source_url;
+      sourcePreview.src = session.source_url;
+      try {
+        await loadPreview(session.source_url, {
+          trimStart: session.trim_start ?? 0,
+          trimEnd: session.trim_end,
+        });
+      } catch (error) {
+        setMessage('Session restored. Source preview could not be rebuilt, but job progress and results are still available.');
+      }
+    }
+
+    async function loadPreview(source, { trimStart = 0, trimEnd = null } = {}) {
       state.buffer = null;
       state.duration = 0;
       state.waveformLayer = null;
-      const duration = await loadDuration(file);
+      const duration = await loadDuration(source);
       if (duration) state.duration = Number(duration.toFixed(1));
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (AudioCtx) {
         const audioContext = new AudioCtx();
         try {
-          const raw = await file.arrayBuffer();
+          const raw = await readSourceArrayBuffer(source);
           state.buffer = await audioContext.decodeAudioData(raw.slice(0));
           state.duration = Number(state.buffer.duration.toFixed(1)) || state.duration;
         } catch (error) {
@@ -538,29 +1079,43 @@
       }
       if (!state.duration) throw new Error('This browser cannot read the selected audio preview. You can still upload supported files, but trimming needs readable metadata.');
       if (state.buffer) prepareWaveformLayer();
-      state.trimStart = 0;
-      state.trimEnd = state.duration;
+      state.trimStart = clamp(Number(trimStart || 0), 0, state.duration);
+      state.trimEnd = trimEnd == null ? state.duration : clamp(Number(trimEnd), state.trimStart, state.duration);
+      if (state.trimEnd <= state.trimStart && state.duration > state.trimStart) state.trimEnd = state.duration;
+      previewPlayBtn.disabled = false;
+      previewLoopToggle.disabled = false;
       trimStartHandle.disabled = false;
       trimEndHandle.disabled = false;
+      updatePreviewLoopUI();
       renderTrimState({ syncPreview: true, forcePreviewSync: true });
     }
 
-    function loadDuration(file) {
+    function loadDuration(source) {
       return new Promise((resolve) => {
         const probe = document.createElement('audio');
-        const url = URL.createObjectURL(file);
+        const isRemote = typeof source === 'string';
+        const url = isRemote ? source : URL.createObjectURL(source);
         probe.preload = 'metadata';
         probe.src = url;
         probe.onloadedmetadata = () => {
           const value = Number.isFinite(probe.duration) ? probe.duration : 0;
-          URL.revokeObjectURL(url);
+          if (!isRemote) URL.revokeObjectURL(url);
           resolve(value);
         };
         probe.onerror = () => {
-          URL.revokeObjectURL(url);
+          if (!isRemote) URL.revokeObjectURL(url);
           resolve(0);
         };
       });
+    }
+
+    async function readSourceArrayBuffer(source) {
+      if (typeof source === 'string') {
+        const response = await fetch(source);
+        if (!response.ok) throw new Error('Preview source could not be loaded.');
+        return response.arrayBuffer();
+      }
+      return source.arrayBuffer();
     }
 
     function resetTrimState() {
@@ -571,12 +1126,18 @@
       state.dragging = null;
       state.dragOffset = 0;
       state.trimBounds = null;
+      state.previewSeeking = false;
+      state.previewSeekBounds = null;
       state.waveformLayer = null;
       if (state.waveformFrame) cancelAnimationFrame(state.waveformFrame);
       state.waveformFrame = 0;
+      previewPlayBtn.disabled = true;
       trimStartHandle.disabled = true;
       trimEndHandle.disabled = true;
+      previewLoopToggle.disabled = true;
       updateTrimUI();
+      updatePreviewLoopUI();
+      updatePreviewTransportUI();
       scheduleWaveformDraw();
     }
 
@@ -584,6 +1145,16 @@
       if (!state.duration || event.target.classList.contains('trim-handle') || event.target === trimSelection) return;
       const point = valueFromPointer(event.clientX);
       const side = Math.abs(point - state.trimStart) <= Math.abs(point - state.trimEnd) ? 'start' : 'end';
+      beginTrimDrag(event, side);
+    }
+
+    function handleTrimSelectionPointerDown(event) {
+      if (!state.duration) return;
+      const rect = trimSelection.getBoundingClientRect();
+      const edgeThreshold = Math.min(28, Math.max(12, rect.width / 3));
+      const offset = event.clientX - rect.left;
+      const distanceToRight = rect.right - event.clientX;
+      const side = offset <= edgeThreshold ? 'start' : distanceToRight <= edgeThreshold ? 'end' : 'selection';
       beginTrimDrag(event, side);
     }
 
@@ -633,19 +1204,18 @@
     function updateTrimUI() {
       const startPct = state.duration ? (state.trimStart / state.duration) * 100 : 0;
       const endPct = state.duration ? (state.trimEnd / state.duration) * 100 : 0;
+      const selectionDuration = Math.max(0, state.trimEnd - state.trimStart);
       trimStartValue.textContent = formatSeconds(state.trimStart);
       trimEndValue.textContent = formatSeconds(state.trimEnd);
-      trimWindow.textContent = `${formatSeconds(state.trimStart)} - ${formatSeconds(state.trimEnd)}`;
-      trimLength.textContent = `Selected length: ${formatSeconds(Math.max(0, state.trimEnd - state.trimStart))}`;
+      trimLength.textContent = formatSeconds(selectionDuration);
       trimSummary.textContent = state.duration ? `Detection will use ${formatSeconds(state.trimEnd - state.trimStart)} from a ${formatSeconds(state.duration)} file.` : 'Choose the section of the song that should be analyzed.';
-      trimMidpoint.textContent = formatSeconds(state.duration / 2);
-      trimDurationLabel.textContent = formatSeconds(state.duration);
       trimSelection.style.left = `${startPct}%`;
       trimSelection.style.width = `${Math.max(0, endPct - startPct)}%`;
       trimStartHandle.style.left = `${startPct}%`;
       trimEndHandle.style.left = `${endPct}%`;
       trimSelection.setAttribute('aria-valuemin', state.trimStart.toFixed(1));
       trimSelection.setAttribute('aria-valuemax', state.trimEnd.toFixed(1));
+      updatePreviewTransportUI();
     }
 
     function renderTrimState({ syncPreview = true, forcePreviewSync = false } = {}) {
@@ -673,7 +1243,7 @@
       layer.height = waveform.height;
       const ctx = layer.getContext('2d');
       const amp = layer.height / 2;
-      ctx.strokeStyle = '#63f5df';
+      ctx.strokeStyle = '#ffd2a1';
       ctx.lineWidth = 2;
       ctx.beginPath();
       for (let i = 0; i < peaks.length; i++) {
@@ -709,7 +1279,7 @@
     function drawWaveform() {
       const ctx = waveform.getContext('2d');
       ctx.clearRect(0, 0, waveform.width, waveform.height);
-      ctx.fillStyle = '#08111f';
+      ctx.fillStyle = '#060403';
       ctx.fillRect(0, 0, waveform.width, waveform.height);
       if (!state.waveformLayer) {
         drawPlaceholderWaveform(ctx);
@@ -717,19 +1287,32 @@
       }
       const startX = state.duration ? (state.trimStart / state.duration) * waveform.width : 0;
       const endX = state.duration ? (state.trimEnd / state.duration) * waveform.width : waveform.width;
-      ctx.fillStyle = 'rgba(99,245,223,.1)';
-      ctx.fillRect(startX, 0, Math.max(2, endX - startX), waveform.height);
-      ctx.fillStyle = 'rgba(5,9,20,.72)';
+      ctx.drawImage(state.waveformLayer, 0, 0);
+      ctx.fillStyle = 'rgba(3,2,1,.76)';
       ctx.fillRect(0, 0, startX, waveform.height);
       ctx.fillRect(endX, 0, waveform.width - endX, waveform.height);
-      ctx.drawImage(state.waveformLayer, 0, 0);
-      ctx.strokeStyle = '#ffbb63';
-      ctx.lineWidth = 1.5;
+      const selectionGradient = ctx.createLinearGradient(0, 0, 0, waveform.height);
+      selectionGradient.addColorStop(0, 'rgba(255,214,163,.18)');
+      selectionGradient.addColorStop(.52, 'rgba(255,155,56,.14)');
+      selectionGradient.addColorStop(1, 'rgba(255,120,26,.24)');
+      ctx.fillStyle = selectionGradient;
+      ctx.fillRect(startX, 0, Math.max(2, endX - startX), waveform.height);
+      ctx.strokeStyle = 'rgba(255,157,54,.96)';
+      ctx.lineWidth = 2;
       ctx.strokeRect(startX, 3, Math.max(2, endX - startX), waveform.height - 6);
+      ctx.strokeStyle = 'rgba(255,243,226,.72)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(startX, 6);
+      ctx.lineTo(startX, waveform.height - 6);
+      ctx.moveTo(endX, 6);
+      ctx.lineTo(endX, waveform.height - 6);
+      ctx.stroke();
+      drawPreviewMarker(ctx);
     }
 
     function drawPlaceholderWaveform(ctx) {
-      ctx.strokeStyle = 'rgba(99,245,223,.35)';
+      ctx.strokeStyle = 'rgba(255,210,161,.3)';
       ctx.lineWidth = 2;
       for (let i = 0; i < 52; i++) {
         const x = 18 + i * 16;
@@ -790,21 +1373,48 @@
 
     function handlePreviewPlay() {
       syncPreviewToTrim(sourcePreview.currentTime < state.trimStart || sourcePreview.currentTime >= state.trimEnd);
+      updatePreviewTransportUI();
+      scheduleWaveformDraw();
       startPreviewMonitor();
+    }
+
+    function handlePreviewLoadedMetadata() {
+      syncPreviewToTrim(true);
+      updatePreviewTransportUI();
+      scheduleWaveformDraw();
+    }
+
+    function handlePreviewPause() {
+      stopPreviewMonitor();
+      updatePreviewTransportUI();
+      scheduleWaveformDraw();
     }
 
     function handlePreviewEnded() {
       stopPreviewMonitor();
+      if (state.loopPreview && state.duration && state.trimEnd > state.trimStart) {
+        setPreviewTime(state.trimStart);
+        updatePreviewTransportUI();
+        scheduleWaveformDraw();
+        sourcePreview.play().catch(() => {});
+        return;
+      }
       syncPreviewToTrim(true);
+      updatePreviewTransportUI();
+      scheduleWaveformDraw();
     }
 
     function handlePreviewSeeking() {
       if (!state.duration) return;
       if (sourcePreview.currentTime < state.trimStart) {
         setPreviewTime(state.trimStart);
+        updatePreviewTransportUI();
+        scheduleWaveformDraw();
         return;
       }
       if (sourcePreview.currentTime > state.trimEnd) setPreviewTime(state.trimEnd);
+      updatePreviewTransportUI();
+      scheduleWaveformDraw();
     }
 
     function startPreviewMonitor() {
@@ -816,11 +1426,22 @@
         }
         if (sourcePreview.currentTime < state.trimStart) setPreviewTime(state.trimStart);
         if (sourcePreview.currentTime >= state.trimEnd) {
+          if (state.loopPreview) {
+            setPreviewTime(state.trimStart);
+            updatePreviewTransportUI();
+            scheduleWaveformDraw();
+            state.previewFrame = requestAnimationFrame(tick);
+            return;
+          }
           sourcePreview.pause();
           setPreviewTime(state.trimStart);
+          updatePreviewTransportUI();
+          scheduleWaveformDraw();
           state.previewFrame = 0;
           return;
         }
+        updatePreviewTransportUI();
+        scheduleWaveformDraw();
         state.previewFrame = requestAnimationFrame(tick);
       };
       state.previewFrame = requestAnimationFrame(tick);
@@ -832,8 +1453,121 @@
       state.previewFrame = 0;
     }
 
+    function beginPreviewSeek(event) {
+      if (!state.duration || previewSeekBar.dataset.disabled === 'true') return;
+      event.preventDefault();
+      state.previewSeeking = true;
+      state.previewSeekBounds = previewSeekBar.getBoundingClientRect();
+      updatePreviewSeekFromPointer(event.clientX);
+    }
+
+    function onPreviewSeekMove(event) {
+      if (!state.previewSeeking) return;
+      updatePreviewSeekFromPointer(event.clientX);
+    }
+
+    function endPreviewSeek() {
+      if (!state.previewSeeking) return;
+      state.previewSeeking = false;
+      state.previewSeekBounds = null;
+    }
+
+    function updatePreviewSeekFromPointer(clientX) {
+      const selectionDuration = Math.max(0, state.trimEnd - state.trimStart);
+      const rect = state.previewSeekBounds || previewSeekBar.getBoundingClientRect();
+      const ratio = clamp((clientX - rect.left) / rect.width, 0, 1);
+      const target = state.trimStart + ratio * (selectionDuration || state.duration);
+      setPreviewTime(target);
+      updatePreviewTransportUI();
+      scheduleWaveformDraw();
+    }
+
+    function updatePreviewTransportUI() {
+      const ready = Boolean(state.duration && sourcePreview.src && sourcePreview.readyState >= 1);
+      const selectionDuration = Math.max(0, state.trimEnd - state.trimStart);
+      const currentTime = ready
+        ? clamp(Number.isFinite(sourcePreview.currentTime) ? sourcePreview.currentTime : state.trimStart, state.trimStart, state.trimEnd || state.duration)
+        : 0;
+      const elapsed = Math.max(0, currentTime - state.trimStart);
+      const total = Math.max(0, selectionDuration || state.duration);
+      const ratio = total ? clamp(elapsed / total, 0, 1) : 0;
+      previewPlayBtn.disabled = !ready;
+      previewPlayBtn.textContent = ready && !sourcePreview.paused ? 'Pause' : 'Play';
+      previewCurrentTime.textContent = formatClock(Math.floor(elapsed));
+      previewTotalTime.textContent = `/ ${formatClock(Math.floor(total))}`;
+      previewSeekBar.dataset.disabled = ready ? 'false' : 'true';
+      previewSeekFill.style.width = `${ratio * 100}%`;
+      previewSeekThumb.style.left = `${ratio * 100}%`;
+    }
+
     function clamp(value, min, max) {
       return Math.min(Math.max(value, min), max);
+    }
+
+    function togglePreviewLoop() {
+      state.loopPreview = !state.loopPreview;
+      updatePreviewLoopUI();
+    }
+
+    function updatePreviewLoopUI() {
+      previewLoopToggle.setAttribute('aria-pressed', state.loopPreview ? 'true' : 'false');
+      previewLoopToggle.textContent = `Loop: ${state.loopPreview ? 'On' : 'Off'}`;
+    }
+
+    function handleGlobalKeydown(event) {
+      if (event.defaultPrevented || event.repeat || event.code !== 'Space') return;
+      if (event.altKey || event.ctrlKey || event.metaKey) return;
+      if (event.target === fileInput && sourcePreview.src && sourcePreview.readyState >= 1) {
+        event.preventDefault();
+        togglePreviewPlayback();
+        return;
+      }
+      if (isTypingContext(event.target)) return;
+      if (!sourcePreview.src || sourcePreview.readyState < 1) return;
+      event.preventDefault();
+      togglePreviewPlayback();
+    }
+
+    function isTypingContext(target) {
+      if (!(target instanceof Element)) return false;
+      return Boolean(target.closest('input, textarea, select, button, audio, summary, [contenteditable="true"]'));
+    }
+
+    function togglePreviewPlayback() {
+      if (!sourcePreview.src || sourcePreview.readyState < 1) return;
+      if (sourcePreview.paused) {
+        syncPreviewToTrim(sourcePreview.currentTime < state.trimStart || sourcePreview.currentTime >= state.trimEnd);
+        sourcePreview.play().catch(() => {});
+        return;
+      }
+      sourcePreview.pause();
+    }
+
+    function drawPreviewMarker(ctx) {
+      if (!state.duration || !sourcePreview.src || sourcePreview.readyState < 1) return;
+      const currentTime = Number.isFinite(sourcePreview.currentTime) ? sourcePreview.currentTime : state.trimStart;
+      const markerTime = clamp(currentTime, state.trimStart, state.trimEnd || state.duration);
+      const markerX = (markerTime / state.duration) * waveform.width;
+      const top = 10;
+      const bottom = waveform.height - 10;
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,244,232,.22)';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(markerX, top);
+      ctx.lineTo(markerX, bottom);
+      ctx.stroke();
+      ctx.strokeStyle = '#fff4e8';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(markerX, top);
+      ctx.lineTo(markerX, bottom);
+      ctx.stroke();
+      ctx.fillStyle = '#fff4e8';
+      ctx.beginPath();
+      ctx.arc(markerX, top + 2, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
     }
 
     function capitalize(value) {
@@ -841,11 +1575,25 @@
       return text ? text[0].toUpperCase() + text.slice(1) : text;
     }
 
+    function capitalizeWords(value) {
+      return String(value || '')
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((word) => word[0].toUpperCase() + word.slice(1))
+        .join(' ');
+    }
+
     function formatSeconds(value) {
       return `${Number(value || 0).toFixed(1)}s`;
     }
 
+    function formatFileSize(bytes) {
+      return `${(Number(bytes || 0) / 1024 / 1024).toFixed(2)} MB`;
+    }
+
+    resetProcessingUI();
     scheduleWaveformDraw();
+    restoreStoredSession();
   </script>
 </body>
 </html>

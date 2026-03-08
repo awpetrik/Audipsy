@@ -11,7 +11,7 @@ try:
 except ImportError:
     genai = None
 
-STEMS = ("vocals", "drums", "bass", "guitar", "piano", "other")
+STEMS = ("vocals", "instrumental", "drums", "bass", "guitar", "piano", "other")
 SCHEMA = {
     "type": "object",
     "properties": {
@@ -68,6 +68,7 @@ def _fallback_report(track_features: dict, stem_features: dict) -> dict:
     }[genre]
     defaults = {
         "vocals": "stacked lead vocal",
+        "instrumental": "full instrumental backing track",
         "drums": "snare, kick, hi-hat kit",
         "bass": "808 bass",
         "guitar": "processed electric guitar",

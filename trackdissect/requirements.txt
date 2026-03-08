@@ -7,3 +7,4 @@ soundfile
 anthropic
 google-genai
 demucs
+torchcodec
