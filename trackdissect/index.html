@@ -146,6 +146,25 @@
       gap: 0;
     }
 
+    body[data-app-state="file_loaded"] .hero-grid,
+    body[data-app-state="analyzing"] .hero-grid,
+    body[data-app-state="complete"] .hero-grid {
+      grid-template-columns: 360px 1fr;
+    }
+
+    body[data-app-state="file_loaded"] .hero h1,
+    body[data-app-state="analyzing"] .hero h1,
+    body[data-app-state="complete"] .hero h1 {
+      font-size: 3rem;
+      margin-bottom: 4px;
+    }
+
+    body[data-app-state="file_loaded"] .hero p,
+    body[data-app-state="analyzing"] .hero p,
+    body[data-app-state="complete"] .hero p {
+      display: none;
+    }
+
     body[data-app-state="idle"] .hero {
       text-align: center;
       padding-bottom: 50px;
@@ -168,6 +187,59 @@
       display: none !important;
       opacity: 0;
       transform: translateY(10px);
+    }
+
+    body:not([data-app-state="idle"]) .dropzone-area {
+      display: none !important;
+    }
+
+    .file-info-strip {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 20px;
+      background: rgba(255, 138, 42, 0.04);
+      border: 1px solid rgba(255, 138, 42, 0.12);
+      border-radius: 18px;
+    }
+
+    body:not([data-app-state="idle"]) .file-info-strip {
+      display: flex;
+    }
+
+    .file-info-strip .details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .file-info-strip .name {
+      display: block;
+      font-weight: 700;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text);
+    }
+
+    .file-info-strip .size {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .change-file-btn {
+      padding: 6px 12px;
+      font-size: 0.7rem;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .change-file-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
     }
 
     .dropzone-area {
@@ -226,13 +298,11 @@
     }
 
     #fileInput {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      cursor: pointer;
-      z-index: 10;
+      display: none !important;
+    }
+
+    #dropzone {
+      position: relative;
     }
 
     #analyzeBtn {
@@ -1678,8 +1748,16 @@
             </div>
             <strong>Drop your track here or click to browse</strong>
             <div class="formats">MP3 · WAV · AAC · M4A · max 12MB</div>
-            <input id="fileInput" type="file"
-              accept=".mp3,.wav,.aac,.m4a,audio/mpeg,audio/wav,audio/aac,audio/mp4,audio/x-m4a,audio/mp4a-latm">
+          </div>
+          <input id="fileInput" type="file"
+            accept=".mp3,.wav,.aac,.m4a,audio/mpeg,audio/wav,audio/aac,audio/mp4,audio/x-m4a,audio/mp4a-latm">
+
+          <div class="file-info-strip" id="fileInfoStrip">
+            <div class="details">
+              <span class="name" id="stripFileName">—</span>
+              <span class="size" id="stripFileMeta">—</span>
+            </div>
+            <button type="button" class="change-file-btn" id="changeFileBtn">Change</button>
           </div>
 
           <div class="quality-selector">
@@ -1940,6 +2018,10 @@
     const startNewProjectBtn = document.getElementById('startNewProjectBtn');
     const resultsSection = document.getElementById('resultsSection');
     const downloadAllZip = document.getElementById('downloadAllZip');
+    const fileInfoStrip = document.getElementById('fileInfoStrip');
+    const stripFileName = document.getElementById('stripFileName');
+    const stripFileMeta = document.getElementById('stripFileMeta');
+    const changeFileBtn = document.getElementById('changeFileBtn');
     state.player.preload = 'auto';
     updateAppUIState('idle');
 
@@ -2003,11 +2085,23 @@
       }
     }, false);
 
+    dropzone.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    changeFileBtn.addEventListener('click', () => {
+      fileInput.click();
+    });
+
     function updateAppUIState(stateName) {
       document.body.dataset.appState = stateName;
       if (stateName === 'file_loaded') {
         analyzeBtn.disabled = false;
         analyzeBtn.classList.add('pulse');
+        if (state.file) {
+          stripFileName.textContent = state.file.name;
+          stripFileMeta.textContent = `${(state.file.size / 1024 / 1024).toFixed(2)} MB`;
+        }
       } else if (stateName === 'idle') {
         analyzeBtn.disabled = true;
         analyzeBtn.classList.remove('pulse');
@@ -3095,7 +3189,7 @@
     function drawWaveform() {
       const ctx = waveform.getContext('2d');
       ctx.clearRect(0, 0, waveform.width, waveform.height);
-      ctx.fillStyle = '#060403';
+      ctx.fillStyle = '#0b0a09';
       ctx.fillRect(0, 0, waveform.width, waveform.height);
       if (!state.waveformLayer) {
         drawPlaceholderWaveform(ctx);
@@ -3104,30 +3198,35 @@
       const startX = state.duration ? (state.trimStart / state.duration) * waveform.width : 0;
       const endX = state.duration ? (state.trimEnd / state.duration) * waveform.width : waveform.width;
       ctx.drawImage(state.waveformLayer, 0, 0);
-      ctx.fillStyle = 'rgba(3,2,1,.76)';
+
+      // Regions outside the trim window
+      ctx.fillStyle = 'rgba(0,0,0,0.65)';
       ctx.fillRect(0, 0, startX, waveform.height);
       ctx.fillRect(endX, 0, waveform.width - endX, waveform.height);
+
+      // The Trim Selection Highlight
       const selectionGradient = ctx.createLinearGradient(0, 0, 0, waveform.height);
-      selectionGradient.addColorStop(0, 'rgba(255,214,163,.18)');
-      selectionGradient.addColorStop(.52, 'rgba(255,155,56,.14)');
-      selectionGradient.addColorStop(1, 'rgba(255,120,26,.24)');
+      selectionGradient.addColorStop(0, 'rgba(255,214,163,0.08)');
+      selectionGradient.addColorStop(.5, 'rgba(255,155,56,0.05)');
+      selectionGradient.addColorStop(1, 'rgba(255,120,26,0.12)');
       ctx.fillStyle = selectionGradient;
       ctx.fillRect(startX, 0, Math.max(2, endX - startX), waveform.height);
-      ctx.strokeStyle = 'rgba(255,157,54,.96)';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(startX, 3, Math.max(2, endX - startX), waveform.height - 6);
-      ctx.stroke();
+
+      // Border for the trim selection
+      ctx.strokeStyle = 'rgba(255,157,54,0.7)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(startX + 0.5, 0.5, Math.max(2, endX - startX) - 1, waveform.height - 1);
 
       // Highlight the portion that was actually analyzed
       if (state.lastAnalyzedStart !== undefined && state.lastAnalyzedEnd !== undefined) {
         const aStartX = (state.lastAnalyzedStart / state.duration) * waveform.width;
         const aEndX = (state.lastAnalyzedEnd / state.duration) * waveform.width;
-        ctx.fillStyle = 'rgba(255, 138, 42, 0.45)';
+        ctx.fillStyle = 'rgba(255, 138, 42, 0.25)';
         ctx.fillRect(aStartX, 0, aEndX - aStartX, waveform.height);
-        // Add a subtle "Analyzed" label
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
         ctx.font = '700 10px "IBM Plex Mono"';
-        ctx.fillText('ANALYZED', aStartX + 4, 14);
+        ctx.fillText('ANALYZED AREA', aStartX + 6, waveform.height - 8);
       }
 
       drawPreviewMarker(ctx);
