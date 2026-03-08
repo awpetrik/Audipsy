@@ -1,6 +1,11 @@
 from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
+import os
+import json
+import threading
+import time
+from dotenv import load_dotenv
 
 from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
@@ -14,6 +19,8 @@ except ImportError:
     from analyzer import analyze_audio, trim_audio
     from separator import separate_audio
 
+load_dotenv()
+
 APP_DIR = Path(__file__).resolve().parent
 DATA_DIR = APP_DIR / "data"
 UPLOAD_DIR = DATA_DIR / "uploads"
@@ -22,9 +29,70 @@ for folder in (UPLOAD_DIR, OUTPUT_DIR):
     folder.mkdir(parents=True, exist_ok=True)
 
 ALLOWED_EXTS = {".mp3", ".wav", ".aac", ".m4a"}
-ICONS = {"vocals": "mic", "instrumental": "inst", "drums": "drum", "bass": "sub", "guitar": "gtr", "piano": "key", "other": "wave"}
+ICONS = {
+    "vocals": "mic",
+    "instrumental": "inst",
+    "drums": "drum",
+    "kick": "kick",
+    "top_drums": "top",
+    "bass": "bass",
+    "sub_bass": "sub",
+    "mid_bass": "mid",
+    "guitar": "gtr",
+    "piano": "key",
+    "other": "wave"
+}
 JOBS: dict[str, dict] = {}
-app = FastAPI(title="TrackDissect")
+JOBS_FILE = DATA_DIR / "jobs.json"
+MAX_JOBS_IN_MEMORY = 20
+
+# Global lock and timer for throttled persistence
+_save_lock = threading.Lock()
+_save_timer: threading.Timer | None = None
+
+def _save_jobs_atomic() -> None:
+    """Perform atomic save to prevent corruption."""
+    global _save_timer
+    with _save_lock:
+        _save_timer = None
+        temp_file = JOBS_FILE.with_suffix(".tmp")
+        try:
+            # Atomic write pattern
+            with open(temp_file, "w") as f:
+                json.dump(JOBS, f)
+            temp_file.replace(JOBS_FILE)
+        except Exception as e:
+            print(f"CRITICAL: Failed to save jobs: {e}")
+
+def _save_jobs(immediate: bool = False) -> None:
+    """Throttle persistence to reduce I/O overhead."""
+    global _save_timer
+    if immediate:
+        _save_jobs_atomic()
+        return
+
+    with _save_lock:
+        if _save_timer is not None:
+            return
+        # Debounce for 3 seconds
+        _save_timer = threading.Timer(3.0, _save_jobs_atomic)
+        _save_timer.start()
+
+def _load_jobs() -> None:
+    global JOBS
+    if JOBS_FILE.exists():
+        try:
+            with open(JOBS_FILE, "r") as f:
+                data = json.load(f)
+                # Ensure we only load up to the limit
+                sorted_jobs = sorted(data.items(), key=lambda x: x[1].get("updated_at", ""), reverse=True)
+                JOBS = dict(sorted_jobs[:MAX_JOBS_IN_MEMORY])
+        except Exception:
+            JOBS = {}
+
+_load_jobs()
+
+app = FastAPI(title="Audipsy")
 ACTIVITY_LIMIT = 8
 TECHNICAL_LOG_LIMIT = 80
 
@@ -42,6 +110,7 @@ def _job(job_id: str) -> dict:
 def _update(job_id: str, **fields) -> None:
     fields.setdefault("updated_at", _timestamp())
     JOBS[job_id].update(fields)
+    _save_jobs()
 
 
 def _append_log(job_id: str, text: str, *, phase: str | None = None, technical: bool = False) -> None:
@@ -54,6 +123,7 @@ def _append_log(job_id: str, text: str, *, phase: str | None = None, technical: 
     else:
         log.append(entry)
         del log[:-limit]
+    _save_jobs()
 
 
 def _set_stage(job_id: str, *, stage: str, progress: int, message: str, event: str | None = None) -> None:
@@ -75,10 +145,11 @@ def process_job(job_id: str) -> None:
         _set_stage(job_id, stage="features", progress=20, message="Extracting track features...", event="Extracting tempo, key, energy, and spectral profile.")
         track_features = analyze_audio(clip["path"])
         _append_log(job_id, f"Track features captured at {track_features['bpm']} BPM in key {track_features['key']}.", phase="features")
-        _set_stage(job_id, stage="separate", progress=38, message="Separating vocals and stems with Demucs...", event="Demucs is loading models and splitting the clip. This is usually the longest step.")
+        _set_stage(job_id, stage="separate", progress=38, message="Separating vocals and stems with Demucs...", event=f"Demucs is splitting the clip using {job.get('quality', 'fast')} mode.")
         stems = separate_audio(
             clip["path"],
             OUTPUT_DIR / job_id,
+            mode=job.get("quality", "fast"),
             event_callback=lambda text: _append_log(job_id, text, phase="separate"),
             technical_callback=lambda text: _append_log(job_id, text, phase="separate", technical=True),
         )
@@ -136,16 +207,24 @@ async def upload_audio(
     file: UploadFile = File(...),
     trim_start: float = Form(0),
     trim_end: float | None = Form(None),
+    quality: str = Form("fast"),
 ):
     if not file.filename or Path(file.filename).suffix.lower() not in ALLOWED_EXTS:
         raise HTTPException(status_code=400, detail="Upload an MP3, WAV, AAC, or M4A file.")
     payload = await file.read()
-    if len(payload) > 10 * 1024 * 1024:
-        raise HTTPException(status_code=400, detail="File size must be 10MB or less.")
+    if len(payload) > 12 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File size must be 12MB or less.")
     job_id = uuid4().hex
     filename = Path(file.filename).name
     upload_path = UPLOAD_DIR / f"{job_id}{Path(filename).suffix.lower()}"
     upload_path.write_bytes(payload)
+    
+    # Cap JOBS history before adding new
+    if len(JOBS) >= MAX_JOBS_IN_MEMORY:
+        # Remove oldest updated job
+        oldest = min(JOBS.keys(), key=lambda k: JOBS[k].get("updated_at", ""))
+        del JOBS[oldest]
+
     JOBS[job_id] = {
         "status": "queued",
         "stage": "queue",
@@ -156,6 +235,7 @@ async def upload_audio(
         "upload_path": str(upload_path),
         "trim_start": trim_start,
         "trim_end": trim_end,
+        "quality": quality,
         "created_at": _timestamp(),
         "updated_at": _timestamp(),
         "started_at": None,
@@ -219,4 +299,20 @@ def media(job_id: str, stem: str):
     path = Path(source) if source else None
     if not path or not path.is_file():
         raise HTTPException(status_code=404, detail="Stem file not found.")
-    return FileResponse(path, filename=path.name)
+    
+    # Better naming based on metadata
+    results = job.get("results", {})
+    metadata = results.get("track_features", {}).get("metadata", {})
+    artist = metadata.get("artist")
+    title = metadata.get("title")
+    stem_label = stem.replace("_", " ").capitalize()
+    
+    if artist and title:
+        download_name = f"{artist} - {title} ({stem_label}).wav"
+    elif title:
+        download_name = f"{title} ({stem_label}).wav"
+    else:
+        orig_name = Path(job.get("filename", "track")).stem
+        download_name = f"{orig_name}_{stem}.wav"
+        
+    return FileResponse(path, filename=download_name)

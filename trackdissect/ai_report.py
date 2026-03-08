@@ -23,9 +23,18 @@ SCHEMA = {
                     "properties": {
                         "detected_instruments": {"type": "array", "items": {"type": "string"}},
                         "likely_fx": {"type": "array", "items": {"type": "string"}},
+                        "mixing_logic": {
+                            "type": "object",
+                            "properties": {
+                                "eq": {"type": "string"},
+                                "dynamics": {"type": "string"},
+                                "space": {"type": "string"},
+                            },
+                            "required": ["eq", "dynamics", "space"],
+                        },
                         "confidence": {"type": "string", "enum": ["low", "medium", "high"]},
                     },
-                    "required": ["detected_instruments", "likely_fx", "confidence"],
+                    "required": ["detected_instruments", "likely_fx", "mixing_logic", "confidence"],
                 }
                 for name in STEMS
             },
@@ -36,10 +45,37 @@ SCHEMA = {
             "properties": {
                 "genre_guess": {"type": "string"},
                 "production_style": {"type": "string"},
+                "musical_characteristics": {
+                    "type": "object",
+                    "properties": {
+                        "mood": {"type": "string"},
+                        "harmonic_complexity": {"type": "string"},
+                        "rhythmic_identity": {"type": "string"},
+                    },
+                    "required": ["mood", "harmonic_complexity", "rhythmic_identity"],
+                },
+                "arrangement_narrative": {
+                    "type": "object",
+                    "properties": {
+                        "structure_guess": {"type": "string"},
+                        "energy_flow": {"type": "string"},
+                        "build_up_technique": {"type": "string"},
+                    },
+                    "required": ["structure_guess", "energy_flow", "build_up_technique"],
+                },
+                "sound_architecture": {
+                    "type": "object",
+                    "properties": {
+                        "technical_summary": {"type": "string"},
+                        "synthesis_tips": {"type": "string"},
+                    },
+                    "required": ["technical_summary", "synthesis_tips"],
+                },
+                "pro_workflow_tip": {"type": "string"},
                 "notable_techniques": {"type": "array", "items": {"type": "string"}},
                 "similar_artists": {"type": "array", "items": {"type": "string"}},
             },
-            "required": ["genre_guess", "production_style", "notable_techniques", "similar_artists"],
+            "required": ["genre_guess", "production_style", "musical_characteristics", "arrangement_narrative", "sound_architecture", "pro_workflow_tip", "notable_techniques", "similar_artists"],
         },
     },
     "required": ["stems", "full_report"],
@@ -54,7 +90,44 @@ def _strip_fences(text: str) -> str:
 
 
 def _payload(filename: str, track_features: dict, stem_features: dict) -> dict:
-    return {"filename": filename, "track_features": track_features, "stem_features": stem_features, "schema": SCHEMA}
+    meta = track_features.get("metadata", {})
+    
+    # Strip redundant spectral data from stem features to reduce token count
+    stripped_stems = {}
+    for stem, features in stem_features.items():
+        stripped_stems[stem] = {
+            "bpm": features.get("bpm"),
+            "key": features.get("key"),
+            "energy": features.get("energy"),
+            "spectral_centroid": features.get("spectral_centroid"),
+            "spectral_flatness": features.get("spectral_flatness"),
+            "crest_factor": features.get("crest_factor"),
+            "stereo_correlation": features.get("stereo_correlation"),
+            "sub_bass_ratio": features.get("sub_bass_ratio"),
+        }
+
+    context = {
+        "filename": filename,
+        "track_metadata": {
+            "artist": meta.get("artist"),
+            "title": meta.get("title"),
+            "album": meta.get("album"),
+            "original_genre_tag": meta.get("genre")
+        },
+        "audio_features": {
+            "bpm": track_features.get("bpm"),
+            "key": track_features.get("key"),
+            "energy": track_features.get("energy"),
+            "danceability": track_features.get("danceability"),
+        },
+        "stem_features": stripped_stems,
+        "processing_info": {
+            "anti_artifact_smoothing": "enabled (High-Shelf Filter @ 14kHz)",
+            "peak_normalization": "-0.5dBFS"
+        },
+        "schema": SCHEMA
+    }
+    return context
 
 
 def _fallback_report(track_features: dict, stem_features: dict) -> dict:
@@ -78,13 +151,18 @@ def _fallback_report(track_features: dict, stem_features: dict) -> dict:
     stems = {}
     for name, feats in stem_features.items():
         fx = ["compression", "EQ shaping"]
-        if feats["spectral_centroid"] > 2500:
-            fx.append("bright top-end enhancement")
+        if feats.get("zero_crossing_rate", 0) > 0.1:
+            fx.append("bright transient enhancement")
         if feats["energy_level"] == "high":
             fx.append("aggressive transient control")
         stems[name] = {
             "detected_instruments": [defaults.get(name, name)],
             "likely_fx": fx,
+            "mixing_logic": {
+                "eq": "Gentle high-pass and broad boost at fundamental frequency.",
+                "dynamics": "Slight compression to glue the transients.",
+                "space": "Parallel plate reverb for depth.",
+            },
             "confidence": "medium" if name == "other" else "high",
         }
     return {
@@ -92,6 +170,21 @@ def _fallback_report(track_features: dict, stem_features: dict) -> dict:
         "full_report": {
             "genre_guess": genre,
             "production_style": style,
+            "musical_characteristics": {
+                "mood": "Dynamic and engaging",
+                "harmonic_complexity": "Modern tonal balance",
+                "rhythmic_identity": "Consistent and energetic"
+            },
+            "arrangement_narrative": {
+                "structure_guess": "Standard contemporary structure",
+                "energy_flow": "Well-balanced energy distribution",
+                "build_up_technique": "Strategic layering and volume automation"
+            },
+            "sound_architecture": {
+                "technical_summary": "Balanced frequency distribution with centered mono low-end.",
+                "synthesis_tips": "Layer sub-oscillator with sawtooth waves for richer texture.",
+            },
+            "pro_workflow_tip": "Use Logic Pro's Drum Machine Designer and check Phase Correlation on the Stereo Out.",
             "notable_techniques": ["layered arrangement", "focused low-end", "stereo depth processing"],
             "similar_artists": artists,
         },
@@ -105,13 +198,21 @@ def _try_claude(prompt: dict) -> dict | None:
     try:
         client = Anthropic(api_key=api_key)
         response = client.messages.create(
-            model=os.getenv("CLAUDE_MODEL", "claude-sonnet-4-20250514"),
-            max_tokens=1200,
-            system="You are a precise music production analyst. Return JSON only.",
+            model=os.getenv("CLAUDE_MODEL", "claude-3-5-sonnet-latest"),
+            max_tokens=2000,
+            system=(
+                "You are a Senior Sound Designer & Logic Pro Specialist. "
+                "Analyze the provided audio features and track metadata (Artist/Title). "
+                "If the Artist/Title is known, provide context-specific production insights about how that specific track was likely produced. "
+                "Provide professional, highly technical mixing and sound design advice. "
+                "Mention specific Logic Pro stock plugins and workflow tips. Use industry terminology. "
+                "Return JSON ONLY matching the provided schema."
+            ),
             messages=[{"role": "user", "content": json.dumps(prompt, ensure_ascii=True)}],
         )
         return json.loads(_strip_fences(response.content[0].text))
-    except Exception:
+    except Exception as e:
+        print(f"DEBUG: Claude AI Error: {e}")
         return None
 
 
@@ -123,12 +224,22 @@ def _try_gemini(prompt: dict) -> dict | None:
     try:
         client = genai.Client(api_key=api_key)
         response = client.models.generate_content(
-            model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
-            contents=json.dumps(prompt, ensure_ascii=True),
-            config={"response_mime_type": "application/json", "response_json_schema": SCHEMA, "temperature": 0.2},
+            model=os.getenv("GEMINI_MODEL", "gemini-3-flash-preview"),
+            contents=(
+                "You are a Senior Sound Designer & Logic Pro Specialist. "
+                "Analyze these audio features and track metadata: " + json.dumps(prompt, ensure_ascii=True) + ". "
+                "If the track is recognizable from the metadata, use your knowledge of its real-world production. "
+                "Provide professional mixing (EQ, Dynamics, Space), sound architecture (Synthesis/Tips), "
+                "musical characteristics (mood/harmony/rhythm), and arrangement narrative (structure/energy). "
+                "Refer to Logic Pro X features and stock plugins specifically (e.g., Phat FX, Step FX, Alchemy). "
+                "Keep descriptions technically dense but concise. "
+                "Return valid JSON matching the schema."
+            ),
+            config={"response_mime_type": "application/json", "response_json_schema": SCHEMA, "temperature": 0.4},
         )
         return json.loads(_strip_fences(response.text))
-    except Exception:
+    except Exception as e:
+        print(f"DEBUG: Gemini AI Error: {e}")
         return None
 
 
