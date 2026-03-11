@@ -78,6 +78,7 @@
     .panel {
       padding: 0;
       min-width: 0;
+      overflow: hidden;
     }
 
     .panel-preview {
@@ -3499,13 +3500,17 @@
       fileInput.value = '';
       releasePreviewUrl();
       resetProcessingUI();
-      resultsSection.style.display = 'none';
-      nextStepsArea.classList.remove('active');
       setMessage('');
       updateAppUIState('idle');
     }
 
     function resetProcessingUI() {
+      if (typeof resultsSection !== 'undefined' && resultsSection) {
+        resultsSection.style.display = 'none';
+      }
+      if (typeof nextStepsArea !== 'undefined' && nextStepsArea) {
+        nextStepsArea.classList.remove('active');
+      }
       clearInterval(state.poller);
       state.poller = null;
       stopProcessClock();
