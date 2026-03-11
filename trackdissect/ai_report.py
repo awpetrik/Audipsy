@@ -29,8 +29,10 @@ SCHEMA = {
                                 "eq": {"type": "string"},
                                 "dynamics": {"type": "string"},
                                 "space": {"type": "string"},
+                                "saturation": {"type": "string"},
+                                "modulation": {"type": "string"},
                             },
-                            "required": ["eq", "dynamics", "space"],
+                            "required": ["eq", "dynamics", "space", "saturation", "modulation"],
                         },
                         "confidence": {"type": "string", "enum": ["low", "medium", "high"]},
                     },
@@ -74,8 +76,9 @@ SCHEMA = {
                 "pro_workflow_tip": {"type": "string"},
                 "notable_techniques": {"type": "array", "items": {"type": "string"}},
                 "similar_artists": {"type": "array", "items": {"type": "string"}},
+                "reference_tracks": {"type": "array", "items": {"type": "string"}},
             },
-            "required": ["genre_guess", "production_style", "musical_characteristics", "arrangement_narrative", "sound_architecture", "pro_workflow_tip", "notable_techniques", "similar_artists"],
+            "required": ["genre_guess", "production_style", "musical_characteristics", "arrangement_narrative", "sound_architecture", "pro_workflow_tip", "notable_techniques", "similar_artists", "reference_tracks"],
         },
     },
     "required": ["stems", "full_report"],
@@ -159,9 +162,11 @@ def _fallback_report(track_features: dict, stem_features: dict) -> dict:
             "detected_instruments": [defaults.get(name, name)],
             "likely_fx": fx,
             "mixing_logic": {
-                "eq": "Gentle high-pass and broad boost at fundamental frequency.",
-                "dynamics": "Slight compression to glue the transients.",
-                "space": "Parallel plate reverb for depth.",
+                "eq": "High-pass at 80Hz, broad +2dB bell at fundamental.",
+                "dynamics": "4:1 ratio compression, 3-5dB gain reduction.",
+                "space": "Parallel plate reverb (0.8s decay) for depth.",
+                "saturation": "Subtle tape saturation for pleasant harmonics.",
+                "modulation": "Slight chorus on the upper frequencies for width.",
             },
             "confidence": "medium" if name == "other" else "high",
         }
@@ -187,6 +192,7 @@ def _fallback_report(track_features: dict, stem_features: dict) -> dict:
             "pro_workflow_tip": "Use Logic Pro's Drum Machine Designer and check Phase Correlation on the Stereo Out.",
             "notable_techniques": ["layered arrangement", "focused low-end", "stereo depth processing"],
             "similar_artists": artists,
+            "reference_tracks": ["Metro Boomin - Space Cadet", "Disclosure - Latch", "J Dilla - Life"],
         },
     }
 
@@ -195,25 +201,26 @@ def _try_claude(prompt: dict) -> dict | None:
     api_key = os.getenv("ANTHROPIC_API_KEY")
     if not api_key or Anthropic is None:
         return None
-    try:
-        client = Anthropic(api_key=api_key)
-        response = client.messages.create(
-            model=os.getenv("CLAUDE_MODEL", "claude-3-5-sonnet-latest"),
-            max_tokens=2000,
-            system=(
-                "You are a Senior Sound Designer & Logic Pro Specialist. "
-                "Analyze the provided audio features and track metadata (Artist/Title). "
-                "If the Artist/Title is known, provide context-specific production insights about how that specific track was likely produced. "
-                "Provide professional, highly technical mixing and sound design advice. "
-                "Mention specific Logic Pro stock plugins and workflow tips. Use industry terminology. "
-                "Return JSON ONLY matching the provided schema."
-            ),
-            messages=[{"role": "user", "content": json.dumps(prompt, ensure_ascii=True)}],
-        )
-        return json.loads(_strip_fences(response.content[0].text))
-    except Exception as e:
-        print(f"DEBUG: Claude AI Error: {e}")
-        return None
+    client = Anthropic(api_key=api_key)
+    for attempt in range(3):
+        try:
+            response = client.messages.create(
+                model=os.getenv("CLAUDE_MODEL", "claude-3-5-sonnet-latest"),
+                max_tokens=2000,
+                system=(
+                    "You are a Senior Sound Designer & Logic Pro Specialist. "
+                    "Analyze the provided audio features and track metadata (Artist/Title). "
+                    "If the Artist/Title is known, provide context-specific production insights and reference specific songs ('reference_tracks') from the real world. "
+                    "Provide professional, highly technical mixing advice. You MUST use specific dB values, Hz frequencies, and ratio/ms times (e.g., 'Cut -3dB at 250Hz', '4:1 compression'). "
+                    "Mention specific Logic Pro stock plugins and workflow tips. Use industry terminology. "
+                    "Return JSON ONLY matching the provided schema."
+                ),
+                messages=[{"role": "user", "content": json.dumps(prompt, ensure_ascii=True)}],
+            )
+            return json.loads(_strip_fences(response.content[0].text))
+        except Exception as e:
+            print(f"DEBUG: Claude AI Error on attempt {attempt + 1}: {e}")
+    return None
 
 
 # Use Gemini structured output so the response stays machine-parseable.
@@ -221,26 +228,28 @@ def _try_gemini(prompt: dict) -> dict | None:
     api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
     if not api_key or genai is None:
         return None
-    try:
-        client = genai.Client(api_key=api_key)
-        response = client.models.generate_content(
-            model=os.getenv("GEMINI_MODEL", "gemini-3-flash-preview"),
-            contents=(
-                "You are a Senior Sound Designer & Logic Pro Specialist. "
-                "Analyze these audio features and track metadata: " + json.dumps(prompt, ensure_ascii=True) + ". "
-                "If the track is recognizable from the metadata, use your knowledge of its real-world production. "
-                "Provide professional mixing (EQ, Dynamics, Space), sound architecture (Synthesis/Tips), "
-                "musical characteristics (mood/harmony/rhythm), and arrangement narrative (structure/energy). "
-                "Refer to Logic Pro X features and stock plugins specifically (e.g., Phat FX, Step FX, Alchemy). "
-                "Keep descriptions technically dense but concise. "
-                "Return valid JSON matching the schema."
-            ),
-            config={"response_mime_type": "application/json", "response_json_schema": SCHEMA, "temperature": 0.4},
-        )
-        return json.loads(_strip_fences(response.text))
-    except Exception as e:
-        print(f"DEBUG: Gemini AI Error: {e}")
-        return None
+    client = genai.Client(api_key=api_key)
+    for attempt in range(3):
+        try:
+            response = client.models.generate_content(
+                model=os.getenv("GEMINI_MODEL", "gemini-3-flash-preview"),
+                contents=(
+                    "You are a Senior Sound Designer & Logic Pro Specialist. "
+                    "Analyze these audio features and track metadata: " + json.dumps(prompt, ensure_ascii=True) + ". "
+                    "If the track is recognizable from the metadata, use your knowledge of its real-world production. Suggest specific reference_tracks. "
+                    "Provide professional mixing (EQ, Dynamics, Space, Saturation, Modulation), sound architecture (Synthesis/Tips), "
+                    "musical characteristics (mood/harmony/rhythm), and arrangement narrative (structure/energy). "
+                    "You MUST mandate specific parameter values (e.g., '-2dB Bell at 4kHz', 'Fast attack 2ms'). "
+                    "Refer to Logic Pro X features and stock plugins specifically (e.g., Phat FX, Step FX, Alchemy). "
+                    "Keep descriptions technically dense but concise. "
+                    "Return valid JSON matching the schema."
+                ),
+                config={"response_mime_type": "application/json", "response_json_schema": SCHEMA, "temperature": 0.4},
+            )
+            return json.loads(_strip_fences(response.text))
+        except Exception as e:
+            print(f"DEBUG: Gemini AI Error on attempt {attempt + 1}: {e}")
+    return None
 
 
 # Choose the configured AI provider, preferring Gemini by default.

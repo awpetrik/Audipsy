@@ -2930,54 +2930,62 @@
       secondaryResults.innerHTML = secondary.map(([stem, info]) => renderStemCard(stem, info, 'compact')).join('');
 
       // AI Report — collapsible details
+      const reportCopyText = `Production Report: ${capitalizeWords(data.full_report.production_style)}\\nGenre: ${capitalizeWords(data.full_report.genre_guess)}\\nNotable Techniques: ${data.full_report.notable_techniques.join(', ')}\\nReference Tracks: ${data.full_report.reference_tracks.join(', ')}\\n\\nMood: ${data.full_report.musical_characteristics.mood}\\nHarmony: ${data.full_report.musical_characteristics.harmonic_complexity}\\nRhythm: ${data.full_report.musical_characteristics.rhythmic_identity}\\n\\nStructure: ${data.full_report.arrangement_narrative.structure_guess}\\nEnergy: ${data.full_report.arrangement_narrative.energy_flow}\\nBuild-up: ${data.full_report.arrangement_narrative.build_up_technique}\\n\\nTech Summary: ${data.full_report.sound_architecture.technical_summary}\\nSynthesis: ${data.full_report.sound_architecture.synthesis_tips}\\n\\nWorkflow: ${data.full_report.pro_workflow_tip}`;
+      
       fullReport.innerHTML = `
-        <details class="report-details">
+        <details class="report-details" open>
           <summary>
             <div class="report-toggle">
               <span>Production Report — ${capitalizeWords(data.full_report.production_style)}</span>
               <svg class="toggle-arrow" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
           </summary>
-          <section class="card full-report-card">
-          <ul class="report-list">
-            ${selection}
-            <li><strong>Genre guess:</strong> ${capitalizeWords(data.full_report.genre_guess)}</li>
-            <li><strong>Notable techniques:</strong> ${data.full_report.notable_techniques.join(', ')}</li>
-            <li><strong>Reference artists:</strong> ${data.full_report.similar_artists.join(', ')}</li>
-          </ul>
-          
-          <div class="report-divider"></div>
-          
-          <div class="pro-insight-section">
-            <div class="section-label">Musical Characteristics</div>
-            <p class="insight-text"><strong>Mood:</strong> ${data.full_report.musical_characteristics.mood}</p>
-            <p class="insight-text"><strong>Harmony:</strong> ${data.full_report.musical_characteristics.harmonic_complexity}</p>
-            <p class="insight-text"><strong>Rhythm:</strong> ${data.full_report.musical_characteristics.rhythmic_identity}</p>
-          </div>
-
-          <div class="pro-insight-section">
-            <div class="section-label">Arrangement Narrative</div>
-            <p class="insight-text"><strong>Structure:</strong> ${data.full_report.arrangement_narrative.structure_guess}</p>
-            <p class="insight-text"><strong>Energy Flow:</strong> ${data.full_report.arrangement_narrative.energy_flow}</p>
-            <p class="insight-text"><strong>Build-up:</strong> ${data.full_report.arrangement_narrative.build_up_technique}</p>
-          </div>
-
-          <div class="report-divider"></div>
-          
-          <div class="pro-insight-section">
-            <div class="section-label">Sound Architecture</div>
-            <p class="insight-text"><strong>Analysis:</strong> ${data.full_report.sound_architecture.technical_summary}</p>
-            <p class="insight-text"><strong>Synthesis Tip:</strong> ${data.full_report.sound_architecture.synthesis_tips}</p>
-          </div>
-          
-          <div class="pro-insight-section">
-            <div class="section-label">Logic Pro Workflow Tip</div>
-            <div class="logic-tip-card">
-              <span class="logic-icon">L</span>
-              <p>${data.full_report.pro_workflow_tip}</p>
+          <section class="card full-report-card" style="position: relative;">
+            <button class="ghost copy-report-btn" onclick="navigator.clipboard.writeText(\`${reportCopyText}\`); this.textContent='Copied!'; setTimeout(() => this.textContent='Copy', 2000);" style="position: absolute; top: 20px; right: 20px; font-size: 0.75rem; padding: 4px 10px;">Copy</button>
+            <div class="report-grid-head" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; padding-right: 60px;">
+              <div><span class="muted" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">Predicted Genre</span><strong style="color: var(--accent); font-size: 1.1rem;">${capitalizeWords(data.full_report.genre_guess)}</strong></div>
+              <div><span class="muted" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">Notable Techniques</span><div style="font-size: 0.85rem; line-height: 1.4;">${data.full_report.notable_techniques.join(', ')}</div></div>
+              <div><span class="muted" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">Reference Tracks</span><div style="font-size: 0.85rem; line-height: 1.4;">${data.full_report.reference_tracks.join('<br>')}</div></div>
             </div>
-          </div>
-        </section>
+            
+            <div class="report-divider"></div>
+            
+            <div class="report-sections-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-top: 24px;">
+              <div class="pro-insight-section">
+                <div class="section-label">Musical Characteristics</div>
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 12px;">
+                  <div class="insight-row" style="display: grid; grid-template-columns: 80px 1fr; gap: 12px; font-size: 0.85rem;"><span class="muted">Mood</span><span>${data.full_report.musical_characteristics.mood}</span></div>
+                  <div class="insight-row" style="display: grid; grid-template-columns: 80px 1fr; gap: 12px; font-size: 0.85rem;"><span class="muted">Harmony</span><span>${data.full_report.musical_characteristics.harmonic_complexity}</span></div>
+                  <div class="insight-row" style="display: grid; grid-template-columns: 80px 1fr; gap: 12px; font-size: 0.85rem;"><span class="muted">Rhythm</span><span>${data.full_report.musical_characteristics.rhythmic_identity}</span></div>
+                </div>
+              </div>
+
+              <div class="pro-insight-section">
+                <div class="section-label">Arrangement Narrative</div>
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 12px;">
+                  <div class="insight-row" style="display: grid; grid-template-columns: 80px 1fr; gap: 12px; font-size: 0.85rem;"><span class="muted">Structure</span><span>${data.full_report.arrangement_narrative.structure_guess}</span></div>
+                  <div class="insight-row" style="display: grid; grid-template-columns: 80px 1fr; gap: 12px; font-size: 0.85rem;"><span class="muted">Energy</span><span>${data.full_report.arrangement_narrative.energy_flow}</span></div>
+                  <div class="insight-row" style="display: grid; grid-template-columns: 80px 1fr; gap: 12px; font-size: 0.85rem;"><span class="muted">Build-up</span><span>${data.full_report.arrangement_narrative.build_up_technique}</span></div>
+                </div>
+              </div>
+
+              <div class="pro-insight-section" style="grid-column: 1 / -1;">
+                <div class="section-label">Sound Architecture</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 12px; font-size: 0.85rem;">
+                  <div><span class="muted" style="display: block; margin-bottom: 6px;">Technical Analysis</span><p style="margin:0; line-height: 1.5;">${data.full_report.sound_architecture.technical_summary}</p></div>
+                  <div><span class="muted" style="display: block; margin-bottom: 6px;">Synthesis Approach</span><p style="margin:0; line-height: 1.5;">${data.full_report.sound_architecture.synthesis_tips}</p></div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="pro-insight-section" style="margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.04);">
+              <div class="section-label">Logic Pro Workflow Tip</div>
+              <div class="logic-tip-card">
+                <span class="logic-icon">L</span>
+                <p>${data.full_report.pro_workflow_tip}</p>
+              </div>
+            </div>
+          </section>
         </details>`;
       document.querySelectorAll('.play-btn').forEach((button) => {
         button.addEventListener('click', () => toggleStem(button));
@@ -3073,7 +3081,18 @@
                 <div class="chips">${instruments}</div>
               </div>
               <div class="stem-section">
+                <div class="section-label">Likely FX</div>
                 <div class="chips">${fx}</div>
+              </div>
+              <div class="pro-mixing-logic" style="margin-top: 10px;">
+                <div class="section-label">Mixing Logic</div>
+                <div class="mixing-grid" style="display: grid; gap: 8px;">
+                  <div class="mixing-item" style="font-size: 0.85rem;"><span class="muted" style="display: inline-block; width: 80px;">EQ</span> ${info.analysis.mixing_logic.eq}</div>
+                  <div class="mixing-item" style="font-size: 0.85rem;"><span class="muted" style="display: inline-block; width: 80px;">Dynamics</span> ${info.analysis.mixing_logic.dynamics}</div>
+                  <div class="mixing-item" style="font-size: 0.85rem;"><span class="muted" style="display: inline-block; width: 80px;">Space</span> ${info.analysis.mixing_logic.space}</div>
+                  ${info.analysis.mixing_logic.saturation ? `<div class="mixing-item" style="font-size: 0.85rem;"><span class="muted" style="display: inline-block; width: 80px;">Saturation</span> ${info.analysis.mixing_logic.saturation}</div>` : ''}
+                  ${info.analysis.mixing_logic.modulation ? `<div class="mixing-item" style="font-size: 0.85rem;"><span class="muted" style="display: inline-block; width: 80px;">Modulation</span> ${info.analysis.mixing_logic.modulation}</div>` : ''}
+                </div>
               </div>
             </div>
           </article>`;
@@ -3123,9 +3142,11 @@
             <div class="pro-mixing-logic">
               <div class="section-label">Mixing Logic</div>
               <div class="mixing-grid" style="display: grid; gap: 8px;">
-                <div class="mixing-item" style="font-size: 0.85rem;"><span class="muted">EQ:</span> ${info.analysis.mixing_logic.eq}</div>
-                <div class="mixing-item" style="font-size: 0.85rem;"><span class="muted">Dynamics:</span> ${info.analysis.mixing_logic.dynamics}</div>
-                <div class="mixing-item" style="font-size: 0.85rem;"><span class="muted">Space:</span> ${info.analysis.mixing_logic.space}</div>
+                <div class="mixing-item" style="font-size: 0.85rem;"><span class="muted" style="display: inline-block; width: 80px;">EQ</span> ${info.analysis.mixing_logic.eq}</div>
+                <div class="mixing-item" style="font-size: 0.85rem;"><span class="muted" style="display: inline-block; width: 80px;">Dynamics</span> ${info.analysis.mixing_logic.dynamics}</div>
+                <div class="mixing-item" style="font-size: 0.85rem;"><span class="muted" style="display: inline-block; width: 80px;">Space</span> ${info.analysis.mixing_logic.space}</div>
+                ${info.analysis.mixing_logic.saturation ? `<div class="mixing-item" style="font-size: 0.85rem;"><span class="muted" style="display: inline-block; width: 80px;">Saturation</span> ${info.analysis.mixing_logic.saturation}</div>` : ''}
+                ${info.analysis.mixing_logic.modulation ? `<div class="mixing-item" style="font-size: 0.85rem;"><span class="muted" style="display: inline-block; width: 80px;">Modulation</span> ${info.analysis.mixing_logic.modulation}</div>` : ''}
               </div>
             </div>
           </article>`;
