@@ -1636,6 +1636,40 @@
       color: var(--muted)
     }
 
+    .chip[data-tooltip] {
+      position: relative;
+      cursor: help;
+    }
+
+    .chip[data-tooltip]::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f0a07;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.65rem;
+      width: max-content;
+      max-width: 260px;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s ease;
+      z-index: 100;
+      border: 1px solid var(--line-strong);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      white-space: pre-wrap;
+      font-weight: 500;
+    }
+
+    .chip[data-tooltip]:hover::after {
+      opacity: 1;
+      bottom: 140%;
+    }
+
     .card-actions {
       margin-top: auto
     }
@@ -3178,7 +3212,8 @@
       const list = Array.isArray(items) ? items.filter(Boolean) : [];
       if (!list.length) return '<span class="chip" data-tone="muted">—</span>';
       const visible = list.slice(0, maxVisible).map((item) => `<span class="chip">${item}</span>`).join('');
-      const extra = list.length > maxVisible ? `<span class="chip" data-tone="muted">+${list.length - maxVisible} more</span>` : '';
+      const hiddenList = list.slice(maxVisible);
+      const extra = hiddenList.length > 0 ? `<span class="chip" data-tone="muted" data-tooltip="${hiddenList.join(', ')}">+${hiddenList.length} more</span>` : '';
       return `${visible}${extra}`;
     }
 
