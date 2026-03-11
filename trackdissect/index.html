@@ -1586,6 +1586,8 @@
       grid-column: 1 / -1;
       border-top: 1px solid rgba(255, 255, 255, .04);
       padding-top: 8px;
+      display: grid;
+      gap: 2px;
     }
 
     .mini-stats {
@@ -3122,12 +3124,12 @@
               </div>
               <div class="pro-mixing-logic" style="margin-top: 10px;">
                 <div class="section-label">Mixing Logic</div>
-                <div class="mixing-grid" style="display: grid; gap: 8px;">
-                  <div class="mixing-item" style="font-size: 0.85rem;"><span class="muted" style="display: inline-block; width: 80px;">EQ</span> ${info.analysis.mixing_logic.eq}</div>
-                  <div class="mixing-item" style="font-size: 0.85rem;"><span class="muted" style="display: inline-block; width: 80px;">Dynamics</span> ${info.analysis.mixing_logic.dynamics}</div>
-                  <div class="mixing-item" style="font-size: 0.85rem;"><span class="muted" style="display: inline-block; width: 80px;">Space</span> ${info.analysis.mixing_logic.space}</div>
-                  ${info.analysis.mixing_logic.saturation ? `<div class="mixing-item" style="font-size: 0.85rem;"><span class="muted" style="display: inline-block; width: 80px;">Saturation</span> ${info.analysis.mixing_logic.saturation}</div>` : ''}
-                  ${info.analysis.mixing_logic.modulation ? `<div class="mixing-item" style="font-size: 0.85rem;"><span class="muted" style="display: inline-block; width: 80px;">Modulation</span> ${info.analysis.mixing_logic.modulation}</div>` : ''}
+                <div class="mixing-grid" style="display: grid; gap: 10px;">
+                  <div class="mixing-item" style="display: flex; gap: 12px; font-size: 0.85rem; line-height: 1.4;"><strong class="muted" style="width: 80px; flex-shrink: 0; font-weight: 700;">EQ</strong> <span>${info.analysis.mixing_logic.eq}</span></div>
+                  <div class="mixing-item" style="display: flex; gap: 12px; font-size: 0.85rem; line-height: 1.4;"><strong class="muted" style="width: 80px; flex-shrink: 0; font-weight: 700;">Dynamics</strong> <span>${info.analysis.mixing_logic.dynamics}</span></div>
+                  <div class="mixing-item" style="display: flex; gap: 12px; font-size: 0.85rem; line-height: 1.4;"><strong class="muted" style="width: 80px; flex-shrink: 0; font-weight: 700;">Space</strong> <span>${info.analysis.mixing_logic.space}</span></div>
+                  ${info.analysis.mixing_logic.saturation ? `<div class="mixing-item" style="display: flex; gap: 12px; font-size: 0.85rem; line-height: 1.4;"><strong class="muted" style="width: 80px; flex-shrink: 0; font-weight: 700;">Saturation</strong> <span>${info.analysis.mixing_logic.saturation}</span></div>` : ''}
+                  ${info.analysis.mixing_logic.modulation ? `<div class="mixing-item" style="display: flex; gap: 12px; font-size: 0.85rem; line-height: 1.4;"><strong class="muted" style="width: 80px; flex-shrink: 0; font-weight: 700;">Modulation</strong> <span>${info.analysis.mixing_logic.modulation}</span></div>` : ''}
                 </div>
               </div>
             </div>
@@ -3177,12 +3179,12 @@
             </div>
             <div class="pro-mixing-logic">
               <div class="section-label">Mixing Logic</div>
-              <div class="mixing-grid" style="display: grid; gap: 8px;">
-                <div class="mixing-item" style="font-size: 0.85rem;"><span class="muted" style="display: inline-block; width: 80px;">EQ</span> ${info.analysis.mixing_logic.eq}</div>
-                <div class="mixing-item" style="font-size: 0.85rem;"><span class="muted" style="display: inline-block; width: 80px;">Dynamics</span> ${info.analysis.mixing_logic.dynamics}</div>
-                <div class="mixing-item" style="font-size: 0.85rem;"><span class="muted" style="display: inline-block; width: 80px;">Space</span> ${info.analysis.mixing_logic.space}</div>
-                ${info.analysis.mixing_logic.saturation ? `<div class="mixing-item" style="font-size: 0.85rem;"><span class="muted" style="display: inline-block; width: 80px;">Saturation</span> ${info.analysis.mixing_logic.saturation}</div>` : ''}
-                ${info.analysis.mixing_logic.modulation ? `<div class="mixing-item" style="font-size: 0.85rem;"><span class="muted" style="display: inline-block; width: 80px;">Modulation</span> ${info.analysis.mixing_logic.modulation}</div>` : ''}
+              <div class="mixing-grid" style="display: grid; gap: 10px;">
+                <div class="mixing-item" style="display: flex; gap: 12px; font-size: 0.85rem; line-height: 1.4;"><strong class="muted" style="width: 80px; flex-shrink: 0; font-weight: 700;">EQ</strong> <span>${info.analysis.mixing_logic.eq}</span></div>
+                <div class="mixing-item" style="display: flex; gap: 12px; font-size: 0.85rem; line-height: 1.4;"><strong class="muted" style="width: 80px; flex-shrink: 0; font-weight: 700;">Dynamics</strong> <span>${info.analysis.mixing_logic.dynamics}</span></div>
+                <div class="mixing-item" style="display: flex; gap: 12px; font-size: 0.85rem; line-height: 1.4;"><strong class="muted" style="width: 80px; flex-shrink: 0; font-weight: 700;">Space</strong> <span>${info.analysis.mixing_logic.space}</span></div>
+                ${info.analysis.mixing_logic.saturation ? `<div class="mixing-item" style="display: flex; gap: 12px; font-size: 0.85rem; line-height: 1.4;"><strong class="muted" style="width: 80px; flex-shrink: 0; font-weight: 700;">Saturation</strong> <span>${info.analysis.mixing_logic.saturation}</span></div>` : ''}
+                ${info.analysis.mixing_logic.modulation ? `<div class="mixing-item" style="display: flex; gap: 12px; font-size: 0.85rem; line-height: 1.4;"><strong class="muted" style="width: 80px; flex-shrink: 0; font-weight: 700;">Modulation</strong> <span>${info.analysis.mixing_logic.modulation}</span></div>` : ''}
               </div>
             </div>
           </article>`;
