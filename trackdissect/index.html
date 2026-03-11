@@ -7,7 +7,7 @@
   <title>Audipsy</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
     rel="stylesheet">
   <style>
     :root {
@@ -18,12 +18,22 @@
       --line: #302519;
       --line-strong: #5a4126;
       --text: #f4ecdf;
-      --muted: #ad9d88;
+      --muted: #c4b5a0;
       --accent: #ff8a2a;
       --accent-soft: #ffd2a1;
       --accent-faint: rgba(255, 138, 42, .12);
       --accent-faint-2: rgba(255, 138, 42, .18);
-      --danger: #ff6e48
+      --danger: #ff6e48;
+      --stem-vocals: #64d2ff;
+      --stem-drums: #ff6b6b;
+      --stem-bass: #a78bfa;
+      --stem-keys: #4ade80;
+      --stem-other: #fbbf24;
+      --radius-xs: 3px;
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+      --radius-pill: 4px
     }
 
     * {
@@ -36,7 +46,7 @@
 
     body {
       margin: 0;
-      font-family: "IBM Plex Mono", monospace;
+      font-family: "IBM Plex Sans", "Helvetica Neue", sans-serif;
       color: var(--text);
       background: radial-gradient(circle at top left, rgba(255, 138, 42, .12), transparent 26%), radial-gradient(circle at bottom right, rgba(255, 138, 42, .08), transparent 24%), linear-gradient(180deg, #080603 0, #0d0906 48%, #130d08 100%)
     }
@@ -61,14 +71,15 @@
     .card {
       background: linear-gradient(180deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .015));
       border: 1px solid var(--line);
-      border-radius: 24px;
+      border-radius: var(--radius-md);
       box-shadow: 0 22px 56px rgba(0, 0, 0, .28)
     }
 
     .hero {
       padding: 30px 30px 26px;
       position: relative;
-      overflow: hidden
+      overflow: hidden;
+      border-radius: var(--radius-md);
     }
 
     .hero::after {
@@ -88,14 +99,18 @@
       font: 600 .78rem/1 "IBM Plex Mono", monospace;
       text-transform: uppercase;
       letter-spacing: .16em;
-      color: var(--accent)
+      color: var(--accent);
+    }
+
+    .mono {
+      font-family: "IBM Plex Mono", monospace;
     }
 
     h1,
     h2,
     h3 {
       margin: 0;
-      font-family: "IBM Plex Mono", monospace
+      font-family: "IBM Plex Mono", monospace;
     }
 
     h1 {
@@ -201,7 +216,7 @@
       padding: 16px 20px;
       background: rgba(255, 138, 42, 0.04);
       border: 1px solid rgba(255, 138, 42, 0.12);
-      border-radius: 18px;
+      border-radius: var(--radius-md);
     }
 
     body:not([data-app-state="idle"]) .file-info-strip {
@@ -231,7 +246,7 @@
     .change-file-btn {
       padding: 6px 12px;
       font-size: 0.7rem;
-      border-radius: 10px;
+      border-radius: var(--radius-sm);
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
       color: var(--text);
@@ -246,7 +261,7 @@
       position: relative;
       padding: 42px 24px;
       border: 2px dashed rgba(255, 138, 42, 0.15);
-      border-radius: 28px;
+      border-radius: var(--radius-md);
       background: rgba(255, 255, 255, 0.01);
       text-align: center;
       cursor: pointer;
@@ -277,7 +292,7 @@
       place-items: center;
       width: 52px;
       height: 52px;
-      border-radius: 16px;
+      border-radius: var(--radius-sm);
       background: rgba(255, 138, 42, 0.1);
       color: var(--accent);
       margin-bottom: 4px;
@@ -356,7 +371,7 @@
 
     .dropzone {
       padding: 20px;
-      border-radius: 20px;
+      border-radius: var(--radius-md);
       border: 1px dashed rgba(255, 138, 42, .38);
       background: linear-gradient(180deg, rgba(255, 138, 42, .08), rgba(255, 138, 42, .04))
     }
@@ -370,7 +385,7 @@
     input[type=file] {
       width: 100%;
       padding: 14px 16px;
-      border-radius: 16px;
+      border-radius: var(--radius-sm);
       border: 1px solid var(--line);
       background: #0b0805;
       color: var(--text);
@@ -380,7 +395,7 @@
     input[type=file]::file-selector-button {
       margin-right: 14px;
       border: none;
-      border-radius: 10px;
+      border-radius: var(--radius-sm);
       padding: 10px 12px;
       background: var(--accent-soft);
       color: #120a04;
@@ -418,7 +433,7 @@
       padding: 16px;
       background: rgba(255, 138, 42, .05);
       border: 1px solid rgba(255, 138, 42, .15);
-      border-radius: 16px;
+      border-radius: var(--radius-sm);
       margin-top: 10px
     }
 
@@ -430,7 +445,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 8px;
+      border-radius: var(--radius-lg);
       font-weight: 900;
       font-size: 1.2rem;
       flex-shrink: 0
@@ -442,7 +457,7 @@
       padding: 18px;
       background: rgba(255, 255, 255, .02);
       border: 1px solid var(--line);
-      border-radius: 20px;
+      border-radius: var(--radius-md);
       text-align: left;
     }
 
@@ -453,7 +468,7 @@
       margin-top: 10px;
       background: #000;
       padding: 5px;
-      border-radius: 14px;
+      border-radius: var(--radius-sm);
       border: 1px solid var(--line-strong);
     }
 
@@ -461,7 +476,7 @@
       background: transparent;
       border: none;
       padding: 10px;
-      border-radius: 10px;
+      border-radius: var(--radius-sm);
       color: var(--muted);
       font: 700 .85rem/1 "IBM Plex Mono", monospace;
       text-transform: uppercase;
@@ -506,7 +521,7 @@
     button,
     .ghost {
       border: 1px solid transparent;
-      border-radius: 14px;
+      border-radius: var(--radius-sm);
       padding: 14px 16px;
       background: var(--accent);
       color: #110904;
@@ -565,7 +580,7 @@
       height: 176px;
       background: #060403;
       border: 1px solid var(--line-strong);
-      border-radius: 20px
+      border-radius: var(--radius-md)
     }
 
     .source-audio {
@@ -584,7 +599,7 @@
     .waveform-surface {
       position: absolute;
       inset: 0;
-      border-radius: 20px;
+      border-radius: var(--radius-md);
       touch-action: none;
       z-index: 2;
       overflow: hidden
@@ -602,7 +617,7 @@
     .preview-transport {
       margin-top: 14px;
       padding: 14px 16px;
-      border-radius: 20px;
+      border-radius: var(--radius-md);
       border: 1px solid var(--line);
       background: rgba(255, 255, 255, .02)
     }
@@ -631,7 +646,7 @@
       position: relative;
       flex: 1 1 240px;
       height: 14px;
-      border-radius: 999px;
+      border-radius: var(--radius-xs);
       border: 1px solid var(--line);
       background: #090603;
       overflow: visible;
@@ -648,7 +663,7 @@
       position: absolute;
       inset: 0 auto 0 0;
       width: 0;
-      border-radius: 999px;
+      border-radius: var(--radius-xs);
       background: linear-gradient(90deg, var(--accent), var(--accent-soft))
     }
 
@@ -688,7 +703,7 @@
     .trim-box {
       margin-top: 14px;
       padding: 16px 18px;
-      border-radius: 20px;
+      border-radius: var(--radius-md);
       border: 1px solid var(--line);
       background: linear-gradient(180deg, rgba(255, 255, 255, .02), rgba(255, 255, 255, .01))
     }
@@ -708,7 +723,7 @@
     .stem-section,
     .stem-inline-stat {
       padding: 14px;
-      border-radius: 18px;
+      border-radius: var(--radius-sm);
       border: 1px solid rgba(255, 255, 255, .05);
       background: rgba(255, 255, 255, .02)
     }
@@ -743,7 +758,7 @@
       bottom: 4px;
       left: 0;
       width: 0;
-      border-radius: 18px;
+      border-radius: var(--radius-sm);
       border: 2px solid rgba(255, 166, 73, .96);
       box-shadow: 0 0 0 1px rgba(255, 244, 232, .18) inset, 0 0 0 999px rgba(5, 3, 2, .18);
       background: linear-gradient(180deg, rgba(255, 194, 128, .18), rgba(255, 138, 42, .2));
@@ -790,7 +805,7 @@
       bottom: 0;
       left: 50%;
       width: 3px;
-      border-radius: 999px;
+      border-radius: var(--radius-xs);
       background: linear-gradient(180deg, rgba(255, 247, 235, .98), rgba(255, 183, 96, .96), rgba(255, 138, 42, .8));
       box-shadow: 0 0 8px rgba(255, 138, 42, .24);
       transform: translateX(-50%)
@@ -810,7 +825,7 @@
       display: none;
       margin-top: 14px;
       padding: 18px;
-      border-radius: 22px;
+      border-radius: var(--radius-md);
       border: 1px solid var(--line-strong);
       background: linear-gradient(180deg, rgba(20, 14, 10, .96), rgba(10, 8, 6, .98));
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, .03);
@@ -829,7 +844,7 @@
       align-items: center;
       justify-content: center;
       z-index: 100;
-      border-radius: 22px;
+      border-radius: var(--radius-md);
     }
 
     .re-analyzing-overlay.active {
@@ -844,7 +859,7 @@
       padding: 24px;
       background: rgba(255, 138, 42, 0.05);
       border: 1px solid rgba(255, 138, 42, 0.15);
-      border-radius: 22px;
+      border-radius: var(--radius-md);
     }
 
     .next-steps-area.active {
@@ -1075,7 +1090,7 @@
 
     .bar {
       height: 10px;
-      border-radius: 999px;
+      border-radius: var(--radius-xs);
       background: #090603;
       border: 1px solid var(--line);
       overflow: hidden
@@ -1150,7 +1165,7 @@
       display: grid;
       gap: 16px;
       background: linear-gradient(180deg, rgba(22, 16, 12, .98), rgba(11, 8, 6, .98));
-      border-radius: 22px;
+      border-radius: var(--radius-md);
       transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease
     }
 
@@ -1232,7 +1247,7 @@
       justify-self: start;
       max-width: 100%;
       padding: 6px 12px;
-      border-radius: 999px;
+      border-radius: var(--radius-pill);
       border: 1px solid rgba(255, 255, 255, .08);
       font-size: .68rem;
       text-transform: uppercase;
@@ -1251,7 +1266,7 @@
       background: #0f0a07;
       color: #fff;
       padding: 10px 14px;
-      border-radius: 12px;
+      border-radius: var(--radius-sm);
       font-size: 0.65rem;
       width: 180px;
       text-align: center;
@@ -1292,7 +1307,7 @@
     .icon {
       width: 56px;
       height: 56px;
-      border-radius: 18px;
+      border-radius: var(--radius-sm);
       display: grid;
       place-items: center;
       border: 1px solid rgba(255, 138, 42, .28);
@@ -1314,7 +1329,7 @@
     .stem-card-secondary .icon {
       width: 44px;
       height: 44px;
-      border-radius: 14px;
+      border-radius: var(--radius-sm);
     }
 
     .stem-card-secondary .icon svg {
@@ -1376,7 +1391,7 @@
       place-items: center;
       width: 40px;
       height: 40px;
-      border-radius: 12px;
+      border-radius: var(--radius-sm);
       background: rgba(255, 138, 42, 0.08);
       border: 1px solid rgba(255, 138, 42, 0.15);
       color: var(--accent-soft);
@@ -1398,7 +1413,7 @@
       background: var(--accent);
       color: #000;
       border: none;
-      border-radius: 14px;
+      border-radius: var(--radius-sm);
       font-weight: 800;
       font-size: 0.95rem;
       cursor: pointer;
@@ -1468,7 +1483,7 @@
     .visual-grid span {
       display: block;
       height: var(--bar);
-      border-radius: 999px 999px 4px 4px;
+      border-radius: var(--radius-xs) var(--radius-xs) 2px 2px;
       background: linear-gradient(180deg, var(--accent-soft), rgba(255, 138, 42, .16));
       transform-origin: bottom center;
       transition: opacity .2s ease, transform .2s ease
@@ -1567,7 +1582,7 @@
 
     .chip {
       padding: 7px 11px;
-      border-radius: 999px;
+      border-radius: var(--radius-pill);
       background: rgba(255, 138, 42, .08);
       border: 1px solid rgba(255, 138, 42, .16);
       color: var(--accent-soft);
@@ -1620,6 +1635,427 @@
 
     .status-error {
       color: var(--danger)
+    }
+
+    /* ── Font size minimum enforcement ── */
+    .metric span,
+    .confidence-pill,
+    .process-step-index {
+      font-size: .72rem;
+    }
+
+    /* ── Stem Tab System ── */
+    .stem-tabs {
+      display: flex;
+      gap: 2px;
+      background: rgba(255, 255, 255, .03);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      margin-bottom: 20px;
+    }
+
+    .stem-tab {
+      flex: 1;
+      padding: 10px 16px;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-xs);
+      color: var(--muted);
+      font: 700 .78rem/1 "IBM Plex Mono", monospace;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      cursor: pointer;
+      transition: all .15s ease;
+      text-align: center;
+    }
+
+    .stem-tab:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, .04);
+    }
+
+    .stem-tab.active {
+      background: var(--accent);
+      color: #110904;
+      box-shadow: 0 2px 8px rgba(255, 138, 42, .2);
+    }
+
+    .stem-tab-content {
+      display: none;
+    }
+
+    .stem-tab-content.active {
+      display: block;
+    }
+
+    /* ── Compact Secondary Cards ── */
+    .stem-card-compact {
+      display: grid;
+      grid-template-columns: 44px 1fr auto auto;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      background: linear-gradient(180deg, rgba(22, 16, 12, .98), rgba(11, 8, 6, .98));
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: border-color .15s ease, background .15s ease;
+    }
+
+    .stem-card-compact:hover {
+      border-color: var(--line-strong);
+      background: linear-gradient(180deg, rgba(28, 20, 14, .98), rgba(14, 10, 7, .98));
+    }
+
+    .stem-card-compact[data-state="playing"] {
+      border-color: rgba(255, 138, 42, .45);
+    }
+
+    .stem-card-compact .compact-info {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .stem-card-compact .compact-info h3 {
+      font-size: 1rem;
+      text-transform: capitalize;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .stem-card-compact .compact-meta {
+      display: flex;
+      gap: 12px;
+      font: 500 .72rem/1 "IBM Plex Mono", monospace;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .stem-card-compact .compact-stats {
+      display: flex;
+      gap: 16px;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: .85rem;
+    }
+
+    .stem-card-compact .compact-stats strong {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .stem-card-compact .compact-stats span {
+      color: var(--muted);
+      font-size: .72rem;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .stem-card-compact .compact-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .compact-expand {
+      display: none;
+      grid-column: 1 / -1;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+      margin-top: 4px;
+    }
+
+    .stem-card-compact.expanded .compact-expand {
+      display: block;
+    }
+
+    .stem-card-compact.expanded {
+      grid-template-columns: 44px 1fr auto auto;
+    }
+
+    /* ── Color-coded stems ── */
+    [data-stem-type="vocals"] .icon,
+    [data-stem-type="lead_vocal"] .icon,
+    [data-stem-type="vocal_layers"] .icon {
+      border-color: rgba(100, 210, 255, .3);
+      background: linear-gradient(180deg, rgba(100, 210, 255, .14), rgba(100, 210, 255, .05));
+      color: var(--stem-vocals);
+    }
+
+    [data-stem-type="vocals"] .visual-grid span,
+    [data-stem-type="lead_vocal"] .visual-grid span,
+    [data-stem-type="vocal_layers"] .visual-grid span {
+      background: linear-gradient(180deg, var(--stem-vocals), rgba(100, 210, 255, .16));
+    }
+
+    [data-stem-type="drums"] .icon,
+    [data-stem-type="kick"] .icon,
+    [data-stem-type="top_drums"] .icon {
+      border-color: rgba(255, 107, 107, .3);
+      background: linear-gradient(180deg, rgba(255, 107, 107, .14), rgba(255, 107, 107, .05));
+      color: var(--stem-drums);
+    }
+
+    [data-stem-type="drums"] .visual-grid span,
+    [data-stem-type="kick"] .visual-grid span,
+    [data-stem-type="top_drums"] .visual-grid span {
+      background: linear-gradient(180deg, var(--stem-drums), rgba(255, 107, 107, .16));
+    }
+
+    [data-stem-type="bass"] .icon,
+    [data-stem-type="sub_bass"] .icon,
+    [data-stem-type="mid_bass"] .icon {
+      border-color: rgba(167, 139, 250, .3);
+      background: linear-gradient(180deg, rgba(167, 139, 250, .14), rgba(167, 139, 250, .05));
+      color: var(--stem-bass);
+    }
+
+    [data-stem-type="bass"] .visual-grid span,
+    [data-stem-type="sub_bass"] .visual-grid span,
+    [data-stem-type="mid_bass"] .visual-grid span {
+      background: linear-gradient(180deg, var(--stem-bass), rgba(167, 139, 250, .16));
+    }
+
+    [data-stem-type="guitar"] .icon,
+    [data-stem-type="piano"] .icon {
+      border-color: rgba(74, 222, 128, .3);
+      background: linear-gradient(180deg, rgba(74, 222, 128, .14), rgba(74, 222, 128, .05));
+      color: var(--stem-keys);
+    }
+
+    [data-stem-type="guitar"] .visual-grid span,
+    [data-stem-type="piano"] .visual-grid span {
+      background: linear-gradient(180deg, var(--stem-keys), rgba(74, 222, 128, .16));
+    }
+
+    [data-stem-type="instrumental"] .icon,
+    [data-stem-type="other"] .icon {
+      border-color: rgba(251, 191, 36, .3);
+      background: linear-gradient(180deg, rgba(251, 191, 36, .14), rgba(251, 191, 36, .05));
+      color: var(--stem-other);
+    }
+
+    [data-stem-type="instrumental"] .visual-grid span,
+    [data-stem-type="other"] .visual-grid span {
+      background: linear-gradient(180deg, var(--stem-other), rgba(251, 191, 36, .16));
+    }
+
+    /* ── Global Sticky Audio Player ── */
+    .global-player {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: linear-gradient(180deg, rgba(18, 13, 8, .97), rgba(9, 6, 3, .99));
+      border-top: 1px solid var(--line-strong);
+      backdrop-filter: blur(20px);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transform: translateY(100%);
+      transition: transform .25s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .global-player.visible {
+      transform: translateY(0);
+    }
+
+    .global-player .gp-stem-name {
+      font: 700 .82rem/1 "IBM Plex Mono", monospace;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--accent-soft);
+      min-width: 100px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .global-player .gp-progress-wrap {
+      flex: 1;
+      height: 6px;
+      background: rgba(255, 255, 255, .06);
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .global-player .gp-progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: var(--radius-xs);
+      width: 0;
+      transition: width .1s linear;
+    }
+
+    .global-player .gp-time {
+      font: 500 .78rem/1 "IBM Plex Mono", monospace;
+      color: var(--muted);
+      min-width: 44px;
+      text-align: right;
+    }
+
+    .global-player .gp-controls {
+      display: flex;
+      gap: 6px;
+    }
+
+    .global-player .gp-btn {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      background: transparent;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      cursor: pointer;
+      padding: 0;
+      transition: all .15s ease;
+    }
+
+    .global-player .gp-btn:hover {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    .global-player .gp-btn.gp-play {
+      width: 38px;
+      height: 38px;
+      background: var(--accent);
+      color: #110904;
+      border-color: var(--accent);
+    }
+
+    body.has-global-player {
+      padding-bottom: 60px;
+    }
+
+    /* ── Success Animation ── */
+    @keyframes successPulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 138, 42, .4); }
+      50% { box-shadow: 0 0 0 12px rgba(255, 138, 42, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 138, 42, 0); }
+    }
+
+    @keyframes successCheck {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .success-celebrate .process-pulse {
+      animation: successPulse .6s ease-out 3 !important;
+      background: #4ade80 !important;
+    }
+
+    .success-badge {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(74, 222, 128, .1);
+      border: 1px solid rgba(74, 222, 128, .25);
+      border-radius: var(--radius-sm);
+      color: #4ade80;
+      font: 700 .78rem/1 "IBM Plex Mono", monospace;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      animation: successCheck .4s cubic-bezier(.175, .885, .32, 1.275) forwards;
+    }
+
+    .success-celebrate .success-badge {
+      display: inline-flex;
+    }
+
+    /* ── Sticky Download FAB ── */
+    .download-fab {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 999;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 22px;
+      background: var(--accent);
+      color: #110904;
+      border: none;
+      border-radius: var(--radius-sm);
+      font: 800 .85rem/1 "IBM Plex Mono", monospace;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 8px 32px rgba(255, 138, 42, .35), 0 2px 8px rgba(0, 0, 0, .5);
+      transition: all .2s cubic-bezier(.175, .885, .32, 1.275);
+    }
+
+    .download-fab.visible {
+      display: flex;
+    }
+
+    .download-fab:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 12px 40px rgba(255, 138, 42, .45), 0 4px 12px rgba(0, 0, 0, .5);
+    }
+
+    body.has-global-player .download-fab {
+      bottom: 70px;
+    }
+
+    /* ── Richer KPI grid ── */
+    .kpis {
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      margin-bottom: 20px;
+    }
+
+    /* ── Report collapsible in results ── */
+    .report-toggle {
+      width: 100%;
+      text-align: left;
+      padding: 16px 20px;
+      background: linear-gradient(180deg, rgba(255, 138, 42, .06), rgba(255, 255, 255, .02));
+      border: 1px solid rgba(255, 138, 42, .18);
+      border-radius: var(--radius-md);
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font: 700 1rem/1 "IBM Plex Mono", monospace;
+      margin-bottom: 16px;
+    }
+
+    .report-toggle:hover {
+      border-color: rgba(255, 138, 42, .35);
+    }
+
+    .report-toggle .toggle-arrow {
+      transition: transform .2s ease;
+      color: var(--accent);
+    }
+
+    .report-details[open] .report-toggle .toggle-arrow {
+      transform: rotate(180deg);
+    }
+
+    .report-details {
+      margin-bottom: 20px;
+    }
+
+    .report-details summary {
+      list-style: none;
+    }
+
+    .report-details summary::-webkit-details-marker {
+      display: none;
     }
 
     @keyframes spin {
@@ -1723,6 +2159,49 @@
 
       .hero p {
         line-height: 1.7
+      }
+
+      .stem-card-compact {
+        grid-template-columns: 40px 1fr;
+        gap: 10px;
+        padding: 12px;
+      }
+
+      .stem-card-compact .compact-stats,
+      .stem-card-compact .compact-actions {
+        grid-column: 1 / -1;
+      }
+
+      .stem-card-compact .compact-stats {
+        justify-content: flex-start;
+      }
+
+      .global-player {
+        padding: 8px 14px;
+        gap: 10px;
+      }
+
+      .global-player .gp-stem-name {
+        display: none;
+      }
+
+      .download-fab {
+        bottom: 12px;
+        right: 12px;
+        padding: 10px 16px;
+        font-size: .75rem;
+      }
+
+      body.has-global-player .download-fab {
+        bottom: 62px;
+      }
+
+      .kpis {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .stem-tabs {
+        flex-direction: column;
       }
     }
   </style>
@@ -1900,34 +2379,74 @@
           Download All Stems (.zip)
         </a>
       </div>
+
+      <!-- Richer KPI Bar -->
       <div class="kpis" id="kpis">
         <div class="kpi">
           <div class="kpi-label">Status</div><strong id="statusKpi">Idle</strong>
         </div>
         <div class="kpi">
-          <div class="kpi-label">Detected BPM</div><strong id="bpmKpi">--</strong>
+          <div class="kpi-label">BPM</div><strong id="bpmKpi">--</strong>
         </div>
         <div class="kpi">
-          <div class="kpi-label">Genre Guess</div><strong id="genreKpi">--</strong>
+          <div class="kpi-label">Key</div><strong id="keyKpi">--</strong>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Genre</div><strong id="genreKpi">--</strong>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Duration</div><strong id="durationKpi">--</strong>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Stems</div><strong id="stemsKpi">--</strong>
         </div>
       </div>
-      <section id="prioritySection" class="result-group" style="display:none">
-        <div class="group-head">
-          <h3>Main Exports</h3>
-          <span class="muted">Best starting point for review and download</span>
-        </div>
-        <div id="priorityResults" class="results results-primary"></div>
-      </section>
-      <section id="secondarySection" class="result-group" style="display:none">
-        <div class="group-head">
-          <h3>Detailed Stems</h3>
-          <span class="muted">Secondary layers for closer arrangement inspection</span>
-        </div>
-        <div id="secondaryResults" class="results results-secondary"></div>
-      </section>
+
+      <!-- AI Report — Repositioned BEFORE stems -->
       <div id="fullReport"></div>
+
+      <!-- Stem Tab System -->
+      <div class="stem-tabs" id="stemTabs">
+        <button class="stem-tab active" data-tab="main">Main Exports</button>
+        <button class="stem-tab" data-tab="detailed">Detailed Stems</button>
+      </div>
+
+      <div id="stemTabMain" class="stem-tab-content active">
+        <section id="prioritySection" class="result-group" style="display:none">
+          <div id="priorityResults" class="results results-primary"></div>
+        </section>
+      </div>
+
+      <div id="stemTabDetailed" class="stem-tab-content">
+        <section id="secondarySection" class="result-group" style="display:none">
+          <div id="secondaryResults" class="results results-secondary"></div>
+        </section>
+      </div>
     </section>
   </main>
+
+  <!-- Global Sticky Audio Player -->
+  <div id="globalPlayer" class="global-player">
+    <div class="gp-stem-name" id="gpStemName">—</div>
+    <div class="gp-progress-wrap" id="gpProgressWrap">
+      <div class="gp-progress-fill" id="gpProgressFill"></div>
+    </div>
+    <div class="gp-time" id="gpTime">0:00</div>
+    <div class="gp-controls">
+      <button class="gp-btn gp-play" id="gpPlayBtn" title="Play/Pause">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      </button>
+      <button class="gp-btn" id="gpCloseBtn" title="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Sticky Download FAB -->
+  <a id="downloadFab" class="download-fab" href="#">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Download All
+  </a>
 
   <script>
     const state = {
@@ -2004,6 +2523,9 @@
     const statusKpi = document.getElementById('statusKpi');
     const bpmKpi = document.getElementById('bpmKpi');
     const genreKpi = document.getElementById('genreKpi');
+    const keyKpi = document.getElementById('keyKpi');
+    const durationKpi = document.getElementById('durationKpi');
+    const stemsKpi = document.getElementById('stemsKpi');
     const trimSlider = document.getElementById('trimSlider');
     const trimSelection = document.getElementById('trimSelection');
     const trimStartHandle = document.getElementById('trimStartHandle');
@@ -2022,6 +2544,15 @@
     const stripFileName = document.getElementById('stripFileName');
     const stripFileMeta = document.getElementById('stripFileMeta');
     const changeFileBtn = document.getElementById('changeFileBtn');
+    const globalPlayer = document.getElementById('globalPlayer');
+    const gpStemName = document.getElementById('gpStemName');
+    const gpProgressWrap = document.getElementById('gpProgressWrap');
+    const gpProgressFill = document.getElementById('gpProgressFill');
+    const gpTime = document.getElementById('gpTime');
+    const gpPlayBtn = document.getElementById('gpPlayBtn');
+    const gpCloseBtn = document.getElementById('gpCloseBtn');
+    const downloadFab = document.getElementById('downloadFab');
+    const stemTabs = document.getElementById('stemTabs');
     state.player.preload = 'auto';
     updateAppUIState('idle');
 
@@ -2147,6 +2678,48 @@
       });
     });
 
+    // Tab switching
+    stemTabs.addEventListener('click', (e) => {
+      const tab = e.target.closest('.stem-tab');
+      if (!tab) return;
+      stemTabs.querySelectorAll('.stem-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const target = tab.dataset.tab;
+      document.getElementById('stemTabMain').classList.toggle('active', target === 'main');
+      document.getElementById('stemTabDetailed').classList.toggle('active', target === 'detailed');
+    });
+
+    // Global player controls
+    gpPlayBtn.addEventListener('click', () => {
+      if (!state.activeButton) return;
+      toggleStem(state.activeButton);
+    });
+    gpCloseBtn.addEventListener('click', () => {
+      if (state.activeButton) {
+        state.player.pause();
+        setStemState(state.activeButton, 'idle');
+        state.activeButton = null;
+        state.activeStemUrl = '';
+      }
+      globalPlayer.classList.remove('visible');
+      document.body.classList.remove('has-global-player');
+    });
+    gpProgressWrap.addEventListener('click', (e) => {
+      if (!state.player.duration) return;
+      const rect = gpProgressWrap.getBoundingClientRect();
+      const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      state.player.currentTime = ratio * state.player.duration;
+    });
+    // Global player progress updater
+    state.player.addEventListener('timeupdate', () => {
+      if (!state.player.duration || !globalPlayer.classList.contains('visible')) return;
+      const pct = (state.player.currentTime / state.player.duration) * 100;
+      gpProgressFill.style.width = pct + '%';
+      const mins = Math.floor(state.player.currentTime / 60);
+      const secs = Math.floor(state.player.currentTime % 60);
+      gpTime.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+    });
+
     analyzeBtn.addEventListener('click', async () => {
       if (!state.file) return setMessage('Choose an MP3, WAV, AAC, or M4A file first.', true);
       analyzeBtn.disabled = true;
@@ -2255,6 +2828,9 @@
           state.lastAnalyzedStart = state.trimStart;
           state.lastAnalyzedEnd = state.trimEnd;
           scheduleWaveformDraw();
+          // Success animation
+          progressShell.classList.add('success-celebrate');
+          setTimeout(() => progressShell.classList.remove('success-celebrate'), 2500);
           await loadResults();
           updateAppUIState('complete');
           resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2284,7 +2860,9 @@
       downloadAllZip.style.display = 'flex';
       downloadAllZip.href = `/results/zip/${state.jobId}`;
       bpmKpi.textContent = data.track_features?.bpm || '--';
+      keyKpi.textContent = data.track_features?.key || '--';
       genreKpi.textContent = capitalizeWords(data.full_report.genre_guess || '--');
+      durationKpi.textContent = data.selection ? formatSeconds(data.selection.duration_seconds) : '--';
       const selection = data.selection ? `<li><strong>Analyzed section:</strong> ${formatSeconds(data.selection.start_seconds)} - ${formatSeconds(data.selection.end_seconds)} (${formatSeconds(data.selection.duration_seconds)})</li>` : '';
       resetStemPlayback();
       clearStemCache();
@@ -2292,17 +2870,26 @@
         .filter(([_, info]) => (info.features?.rms_energy || 0) > 0.0005)
         .sort((a, b) => (b[1].features?.rms_energy || 0) - (a[1].features?.rms_energy || 0));
 
+      stemsKpi.textContent = entries.length;
+
       const primaryOrder = ['vocals', 'instrumental'];
       const primary = primaryOrder.map((name) => entries.find(([stem]) => stem === name)).filter(Boolean);
       const secondary = entries.filter(([stem]) => !primaryOrder.includes(stem));
       prioritySection.style.display = primary.length ? 'grid' : 'none';
       secondarySection.style.display = secondary.length ? 'grid' : 'none';
       priorityResults.innerHTML = primary.map(([stem, info]) => renderStemCard(stem, info, 'primary')).join('');
-      secondaryResults.innerHTML = secondary.map(([stem, info]) => renderStemCard(stem, info, 'secondary')).join('');
+      secondaryResults.innerHTML = secondary.map(([stem, info]) => renderStemCard(stem, info, 'compact')).join('');
+
+      // AI Report — collapsible details
       fullReport.innerHTML = `
-        <section class="card full-report-card">
-          <div class="eyebrow">Full Production Report</div>
-          <h2 style="margin-top:10px">${capitalizeWords(data.full_report.production_style)}</h2>
+        <details class="report-details" open>
+          <summary>
+            <div class="report-toggle">
+              <span>Production Report — ${capitalizeWords(data.full_report.production_style)}</span>
+              <svg class="toggle-arrow" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </summary>
+          <section class="card full-report-card">
           <ul class="report-list">
             ${selection}
             <li><strong>Genre guess:</strong> ${capitalizeWords(data.full_report.genre_guess)}</li>
@@ -2341,20 +2928,41 @@
               <p>${data.full_report.pro_workflow_tip}</p>
             </div>
           </div>
-        </section>`;
+        </section>
+        </details>`;
       document.querySelectorAll('.play-btn').forEach((button) => {
         button.addEventListener('click', () => toggleStem(button));
         button.addEventListener('mouseenter', () => warmStem(button.dataset.url));
         button.addEventListener('focus', () => warmStem(button.dataset.url));
       });
+      // Compact card expand/collapse
+      document.querySelectorAll('.stem-card-compact').forEach((card) => {
+        card.addEventListener('click', (e) => {
+          if (e.target.closest('.play-btn') || e.target.closest('.download-btn-mini') || e.target.closest('a')) return;
+          card.classList.toggle('expanded');
+        });
+      });
+      // Download FAB
+      downloadFab.href = `/results/zip/${state.jobId}`;
+      downloadFab.classList.add('visible');
       storeSession({ jobId: state.jobId });
     }
 
-    function renderStemCard(stem, info, variant = 'secondary') {
+    function getStemType(stem) {
+      if (['vocals', 'lead_vocal', 'vocal_layers'].includes(stem)) return 'vocals';
+      if (['drums', 'kick', 'top_drums'].includes(stem)) return 'drums';
+      if (['bass', 'sub_bass', 'mid_bass'].includes(stem)) return 'bass';
+      if (['guitar', 'piano'].includes(stem)) return 'guitar';
+      return stem;
+    }
+
+    function renderStemCard(stem, info, variant = 'compact') {
       const isPrimary = variant === 'primary';
+      const isCompact = variant === 'compact';
       const label = capitalizeWords(stem.replace(/_/g, ' '));
       const range = `${info.features.frequency_range.low_hz}-${info.features.frequency_range.high_hz} Hz`;
       const energy = capitalize(info.features.energy_level);
+      const stemType = getStemType(stem);
 
       const bars = buildStemBars(stem, info.features, isPrimary ? 16 : 14);
       const instruments = renderChipList(info.analysis.detected_instruments, isPrimary ? 3 : 2);
@@ -2373,7 +2981,7 @@
 
       const transport = `
         <div class="card-action-bar">
-          <button class="ghost transport play-btn" data-url="${info.preview_url}" data-state="idle" data-idle-label="${idleLabel}">
+          <button class="ghost transport play-btn" data-url="${info.preview_url}" data-state="idle" data-idle-label="${idleLabel}" data-stem-label="${label}">
             <span class="transport-orb"></span>
             <span class="transport-label">${idleLabel}</span>
           </button>
@@ -2381,9 +2989,46 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           </a>
         </div>`;
+
+      // Compact row layout for secondary stems
+      if (isCompact) {
+        return `
+          <article class="stem-card-compact" data-state="idle" data-stem="${stem}" data-stem-type="${stemType}">
+            <div class="icon" aria-hidden="true">${renderStemIcon(stem)}</div>
+            <div class="compact-info">
+              <h3>${label}</h3>
+              <div class="compact-meta">
+                <span class="confidence-pill ${info.analysis.confidence}" data-tooltip="${tooltip}">${info.analysis.confidence}</span>
+                <span>${range}</span>
+              </div>
+            </div>
+            <div class="compact-stats">
+              <div><span>BPM</span><strong>${bpm}</strong></div>
+              <div><span>Key</span><strong>${info.features.key}</strong></div>
+            </div>
+            <div class="compact-actions">${transport}</div>
+            <div class="compact-expand">
+              <div class="stem-visual">
+                <div class="visual-grid">${bars}</div>
+                <div class="visual-footer">
+                  <div><span>Energy</span><strong>${energy}</strong></div>
+                  <div><span>Duration</span><strong>${formatSeconds(info.features.duration_seconds)}</strong></div>
+                </div>
+              </div>
+              <div class="stem-section" style="margin-top: 10px;">
+                <div class="section-label">Detected instruments</div>
+                <div class="chips">${instruments}</div>
+              </div>
+              <div class="stem-section">
+                <div class="chips">${fx}</div>
+              </div>
+            </div>
+          </article>`;
+      }
+
       if (isPrimary) {
         return `
-          <article class="card stem-card stem-card-primary" data-state="idle" data-stem="${stem}">
+          <article class="card stem-card stem-card-primary" data-state="idle" data-stem="${stem}" data-stem-type="${stemType}">
             <div class="stem-top">
               <div class="icon" aria-hidden="true">${renderStemIcon(stem)}</div>
               <div class="stem-copy">
@@ -2432,39 +3077,7 @@
             </div>
           </article>`;
       }
-      return `
-        <article class="card stem-card stem-card-secondary" data-state="idle" data-stem="${stem}">
-          <div class="stem-card-head">
-            <div class="icon" aria-hidden="true">${renderStemIcon(stem)}</div>
-            <div class="stem-copy">
-              <div class="stem-heading">
-                <h3>${label}</h3>
-              </div>
-              <div class="stem-meta-row">
-                <span class="confidence-pill ${info.analysis.confidence}" data-tooltip="${tooltip}">${info.analysis.confidence} confidence</span>
-              </div>
-            </div>
-            <div class="transport-row">${transport}</div>
-          </div>
-          
-          <div class="stat-grid" style="grid-template-columns: repeat(2, 1fr); padding: 0 16px;">
-            <div class="metric priority"><span>BPM</span><strong>${bpm}</strong></div>
-            <div class="metric priority"><span>Key</span><strong>${info.features.key}</strong></div>
-          </div>
-
-          <div class="stem-visual">
-            <div class="visual-grid">${bars}</div>
-            <div class="visual-footer">
-              <div><span>Focus</span><strong>${range}</strong></div>
-              <div><span>Energy</span><strong>${energy}</strong></div>
-            </div>
-          </div>
-          
-          <div class="stem-section" style="padding: 0 16px 16px;">
-            <div class="chips">${instruments}</div>
-            <div class="chips">${fx}</div>
-          </div>
-        </article>`;
+      return '';
     }
 
     function renderStemIcon(stem) {
@@ -2527,21 +3140,45 @@
 
     function setStemState(button, status, label = '') {
       if (!button) return;
-      const card = button.closest('.stem-card');
+      const card = button.closest('.stem-card') || button.closest('.stem-card-compact');
       const text = label || defaultStemCopy(status);
       const idleLabel = button.dataset.idleLabel || 'Play';
+      const stemLabel = button.dataset.stemLabel || 'Stem';
       button.dataset.state = status;
-      card.dataset.state = status;
-      const copy = card.querySelector('.stem-status-copy');
+      if (card) card.dataset.state = status;
+      
+      const copy = card ? card.querySelector('.stem-status-copy') : null;
       const transport = button.querySelector('.transport-label');
-      copy.textContent = text;
-      transport.textContent = {
-        idle: idleLabel,
-        loading: 'Loading',
-        playing: 'Pause',
-        paused: 'Resume',
-        error: 'Retry',
-      }[status];
+      
+      if (copy) copy.textContent = text;
+      if (transport) {
+        transport.textContent = {
+          idle: idleLabel,
+          loading: 'Loading',
+          playing: 'Pause',
+          paused: 'Resume',
+          error: 'Retry',
+        }[status];
+      }
+
+      // Global player sync
+      if (status === 'playing') {
+        gpStemName.textContent = stemLabel;
+        gpPlayBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+        globalPlayer.classList.add('visible');
+        document.body.classList.add('has-global-player');
+      } else if (status === 'idle' || status === 'error') {
+        globalPlayer.classList.remove('visible');
+        document.body.classList.remove('has-global-player');
+        gpProgressFill.style.width = '0';
+      } else if (status === 'paused') {
+        gpPlayBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+      } else if (status === 'loading') {
+        gpStemName.textContent = stemLabel;
+        globalPlayer.classList.add('visible');
+        document.body.classList.add('has-global-player');
+        gpPlayBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10" opacity="0.3"/><path d="M12 2a10 10 0 0 1 10 10" stroke-dasharray="20" stroke-dashoffset="0"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="0.8s" repeatCount="indefinite"/></path></svg>';
+      }
     }
 
     async function warmStem(url) {
@@ -2795,6 +3432,7 @@
       state.poller = null;
       stopProcessClock();
       progressShell.classList.remove('active');
+      progressShell.classList.remove('success-celebrate');
       progressShell.dataset.status = 'idle';
       progressFill.style.width = '0%';
       progressValue.textContent = '0%';
@@ -2812,6 +3450,9 @@
       technicalLog.textContent = 'Technical details will appear here when the separator reports them.';
       technicalPanel.open = false;
       processElapsed.textContent = '00:00';
+      downloadFab.classList.remove('visible');
+      globalPlayer.classList.remove('visible');
+      document.body.classList.remove('has-global-player');
     }
 
     function syncProcessClock(baseTime, status) {
