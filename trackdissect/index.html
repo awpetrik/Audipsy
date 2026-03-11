@@ -75,6 +75,20 @@
       box-shadow: 0 22px 56px rgba(0, 0, 0, .28)
     }
 
+    .panel {
+      padding: 0;
+      min-width: 0;
+    }
+
+    .panel-preview {
+      padding: 20px;
+    }
+
+    .panel-preview .waveform-shell {
+      margin-left: -20px;
+      margin-right: -20px;
+    }
+
     .hero {
       padding: 30px 30px 26px;
       position: relative;
@@ -90,7 +104,8 @@
       height: 220px;
       border-radius: 50%;
       background: radial-gradient(circle, rgba(255, 138, 42, .18), transparent 72%);
-      opacity: .8
+      opacity: .8;
+      pointer-events: none;
     }
 
     .eyebrow,
@@ -197,8 +212,7 @@
     }
 
     body[data-app-state="idle"] .panel-preview,
-    body[data-app-state="idle"] .quality-selector,
-    body[data-app-state="idle"] #message {
+    body[data-app-state="idle"] .quality-selector {
       display: none !important;
       opacity: 0;
       transform: translateY(10px);
@@ -879,6 +893,31 @@
     .progress-shell[data-status=done] .activity-panel,
     .progress-shell[data-status=done] .tech-panel {
       display: none
+    }
+
+    .progress-shell .view-results-btn {
+      display: none;
+      width: 100%;
+      margin-top: 12px;
+      padding: 14px;
+      background: var(--accent);
+      color: #110904;
+      border: none;
+      border-radius: var(--radius-sm);
+      font: 800 .85rem/1 "IBM Plex Mono", monospace;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      cursor: pointer;
+      transition: all .2s ease;
+    }
+
+    .progress-shell .view-results-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(255, 138, 42, .3);
+    }
+
+    .progress-shell[data-status=done] .view-results-btn {
+      display: block;
     }
 
     .progress-shell[data-status=error] {
@@ -2210,7 +2249,7 @@
 <body data-app-state="idle">
   <main class="shell">
     <section class="hero">
-      <div class="eyebrow">AI Production Analyzer</div>
+      <div class="eyebrow">Neural Stem Isolation Engine</div>
       <h1>Audipsy</h1>
       <p>Upload a rough bounce, split it into vocals, instrumental, and detailed stems, inspect its sonic profile, and
         turn audio features into a fast production breakdown built for reference hunting.</p>
@@ -2301,6 +2340,7 @@
               <pre id="technicalLog"
                 class="tech-log">Technical details will appear here when the separator reports them.</pre>
             </details>
+            <button id="viewResultsBtn" class="view-results-btn" type="button">View Results ↓</button>
           </div>
         </section>
         <section class="panel panel-preview">
@@ -2449,6 +2489,13 @@
   </a>
 
   <script>
+    window.addEventListener('error', e => {
+      alert("JS Error: " + e.message + " at line " + e.lineno);
+    });
+    window.addEventListener('unhandledrejection', e => {
+      alert("Unhandled Promise Rejection: " + e.reason);
+    });
+
     const state = {
       file: null,
       jobId: null,
@@ -2617,10 +2664,12 @@
     }, false);
 
     dropzone.addEventListener('click', () => {
+      fileInput.value = '';
       fileInput.click();
     });
 
     changeFileBtn.addEventListener('click', () => {
+      fileInput.value = '';
       fileInput.click();
     });
 
@@ -2882,7 +2931,7 @@
 
       // AI Report — collapsible details
       fullReport.innerHTML = `
-        <details class="report-details" open>
+        <details class="report-details">
           <summary>
             <div class="report-toggle">
               <span>Production Report — ${capitalizeWords(data.full_report.production_style)}</span>
@@ -2972,12 +3021,16 @@
       const idleLabel = isPrimary ? 'Preview stem' : 'Play';
       const bpm = (info.features.bpm && info.features.bpm > 0) ? info.features.bpm : '—';
 
+      const confidenceList = ['high', 'medium', 'low'];
+      const rawConf = info.analysis.confidence || 'low';
+      const confidence = confidenceList.includes(rawConf.toLowerCase()) ? rawConf.toLowerCase() : 'low';
+
       const confidenceTooltips = {
         high: "High reliability. Detection exceeds 85% accuracy threshold.",
         medium: "Moderate reliability. Some characteristics may be subtle.",
         low: "Low reliability. Complex audio layering may affect analysis accuracy."
       };
-      const tooltip = confidenceTooltips[info.analysis.confidence] || "AI detection confidence level.";
+      const tooltip = confidenceTooltips[confidence];
 
       const transport = `
         <div class="card-action-bar">
@@ -2998,7 +3051,7 @@
             <div class="compact-info">
               <h3>${label}</h3>
               <div class="compact-meta">
-                <span class="confidence-pill ${info.analysis.confidence}" data-tooltip="${tooltip}">${info.analysis.confidence}</span>
+                <span class="confidence-pill ${confidence}" data-tooltip="${tooltip}">${capitalize(confidence)}</span>
                 <span>${range}</span>
               </div>
             </div>
@@ -3036,7 +3089,7 @@
                   <h3>${label}</h3>
                 </div>
                 <div class="stem-meta-row">
-                  <span class="confidence-pill ${info.analysis.confidence}" data-tooltip="${tooltip}">${info.analysis.confidence} confidence</span>
+                  <span class="confidence-pill ${confidence}" data-tooltip="${tooltip}">${capitalize(confidence)} confidence</span>
                   <div class="stem-status">
                     <span class="status-dot"></span>
                     <span class="stem-status-copy">Ready to preview</span>
@@ -3401,6 +3454,10 @@
       technicalLog.textContent = lines.slice(-50).map(l => `[${formatProcessOffset(l.at)}] ${l.text}`).join('\n');
       technicalLog.scrollTop = technicalLog.scrollHeight;
     }
+
+    document.getElementById('viewResultsBtn').addEventListener('click', () => {
+      resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
 
     scrollToTrimBtn.addEventListener('click', () => {
       document.querySelector('.upload').scrollIntoView({ behavior: 'smooth' });
@@ -4146,7 +4203,10 @@
     }
 
     function formatSeconds(value) {
-      return `${Number(value || 0).toFixed(1)}s`;
+      const total = Math.round(Number(value || 0));
+      const mins = Math.floor(total / 60);
+      const secs = total % 60;
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
 
     function formatFileSize(bytes) {
