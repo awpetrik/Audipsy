@@ -11,7 +11,12 @@ try:
 except ImportError:
     genai = None
 
-STEMS = ("vocals", "instrumental", "drums", "bass", "guitar", "piano", "other")
+STEMS = (
+    "vocals", "lead_vocal", "vocal_layers", "instrumental",
+    "drums", "kick", "top_drums",
+    "bass", "sub_bass", "mid_bass",
+    "guitar", "piano", "other"
+)
 SCHEMA = {
     "type": "object",
     "properties": {
