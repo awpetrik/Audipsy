@@ -23,6 +23,9 @@
       --accent-soft: #ffd2a1;
       --accent-faint: rgba(255, 138, 42, .12);
       --accent-faint-2: rgba(255, 138, 42, .18);
+      --utility: #37b38a;
+      --utility-soft: #8ce8cc;
+      --utility-glow: rgba(55, 179, 138, .32);
       --danger: #ff6e48;
       --stem-vocals: #64d2ff;
       --stem-drums: #ff6b6b;
@@ -184,7 +187,7 @@
     body[data-app-state="file_loaded"] .hero-grid,
     body[data-app-state="analyzing"] .hero-grid,
     body[data-app-state="complete"] .hero-grid {
-      grid-template-columns: 360px 1fr;
+      grid-template-columns: minmax(392px, 420px) minmax(0, 1fr);
     }
 
     body[data-app-state="file_loaded"] .hero h1,
@@ -230,16 +233,16 @@
     .file-info-strip {
       display: none;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 16px 20px;
+      gap: 10px;
+      padding: 14px 14px;
+      grid-template-columns: minmax(0, 1fr) auto;
       background: rgba(255, 138, 42, 0.04);
       border: 1px solid rgba(255, 138, 42, 0.12);
       border-radius: var(--radius-md);
     }
 
     body:not([data-app-state="idle"]) .file-info-strip {
-      display: flex;
+      display: grid;
     }
 
     .file-info-strip .details {
@@ -250,7 +253,7 @@
     .file-info-strip .name {
       display: block;
       font-weight: 700;
-      font-size: 0.95rem;
+      font-size: 0.88rem;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -263,8 +266,16 @@
     }
 
     .change-file-btn {
-      padding: 6px 12px;
-      font-size: 0.7rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      min-width: 68px;
+      min-height: 32px;
+      padding: 6px 9px;
+      font-size: 0.62rem;
+      letter-spacing: 0.035em;
+      line-height: 1;
       border-radius: var(--radius-sm);
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -374,13 +385,15 @@
 
     .skip-ai-sublabel {
       display: block;
-      font-size: 0.68rem;
+      font-size: 0.62rem;
       color: var(--muted);
       font-style: italic;
       margin-top: 4px;
       font-weight: 400;
       text-transform: none;
       letter-spacing: normal;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
     }
 
     .upload {
@@ -473,17 +486,24 @@
     /* Quality Selector */
     .quality-selector {
       margin: 20px 0;
-      padding: 18px;
+      padding: 16px;
       background: rgba(255, 255, 255, .02);
       border: 1px solid var(--line);
       border-radius: var(--radius-md);
       text-align: left;
     }
 
+    .quality-title {
+      margin-bottom: 8px;
+      display: block;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+    }
+
     .quality-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
       margin-top: 10px;
       background: #000;
       padding: 5px;
@@ -494,12 +514,14 @@
     .quality-opt {
       background: transparent;
       border: none;
-      padding: 10px;
+      min-width: 0;
+      padding: 10px 8px;
       border-radius: var(--radius-sm);
       color: var(--muted);
-      font: 700 .85rem/1 "IBM Plex Mono", monospace;
+      font: 700 .76rem/1 "IBM Plex Mono", monospace;
       text-transform: uppercase;
-      letter-spacing: .05em;
+      letter-spacing: .02em;
+      white-space: nowrap;
       cursor: pointer;
       transition: all .2s ease;
       display: flex;
@@ -511,6 +533,37 @@
       background: var(--accent);
       color: #000;
       box-shadow: 0 4px 12px rgba(255, 138, 42, .25);
+    }
+
+    .skip-opt {
+      margin-top: 16px;
+      display: block;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .skip-opt-row {
+      display: grid;
+      grid-template-columns: 16px minmax(0, 1fr);
+      align-items: start;
+      column-gap: 10px;
+    }
+
+    .skip-opt input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      margin: 2px 0 0;
+      accent-color: var(--accent);
+    }
+
+    .skip-opt .fine {
+      display: block;
+      font-size: 0.64rem;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.2;
+      overflow-wrap: anywhere;
     }
 
     .pro-mixing-logic {
@@ -890,14 +943,97 @@
       gap: 14px
     }
 
+    .progress-head-main {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .progress-head-main strong {
+      display: block;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
     .progress-shell[data-status=done] {
       border-color: rgba(255, 138, 42, .4)
     }
 
-    .progress-shell[data-status=done] .process-stage-rail,
-    .progress-shell[data-status=done] .activity-panel,
-    .progress-shell[data-status=done] .tech-panel {
+    .progress-shell.timeline-compact .process-caption,
+    .progress-shell.timeline-compact .process-stage-rail,
+    .progress-shell.timeline-compact .activity-panel,
+    .progress-shell.timeline-compact .tech-panel {
       display: none
+    }
+
+    .progress-shell.timeline-compact {
+      gap: 10px;
+    }
+
+    .progress-shell.timeline-compact .bar {
+      margin-bottom: 2px;
+    }
+
+    .progress-toggle-btn {
+      display: inline-flex;
+      justify-content: center;
+      width: 100%;
+      padding: 8px 10px;
+      border-color: rgba(255, 138, 42, .28);
+      font-size: .64rem;
+      letter-spacing: .08em;
+    }
+
+    .cancel-analysis-btn {
+      width: 100%;
+      justify-content: center;
+      padding: 8px 10px;
+      line-height: 1.2;
+      white-space: normal;
+    }
+
+    .progress-summary {
+      display: none;
+      grid-template-columns: 1fr;
+      align-items: start;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 138, 42, .2);
+      background: linear-gradient(180deg, rgba(255, 138, 42, .08), rgba(255, 138, 42, .03));
+    }
+
+    .progress-shell.timeline-compact .progress-summary {
+      display: grid;
+    }
+
+    .progress-summary-copy {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+      text-align: center;
+      justify-items: center;
+    }
+
+    .progress-summary-copy strong {
+      font-size: .9rem;
+      letter-spacing: -.01em;
+    }
+
+    .progress-summary-copy span {
+      font-size: .76rem;
+      color: var(--muted);
+      line-height: 1.45;
+      max-width: 36ch;
+      margin: 0 auto;
+    }
+
+    .progress-summary-action {
+      display: none;
+      padding: 8px 11px;
+      font-size: .62rem;
+      letter-spacing: .08em;
+      border-color: rgba(255, 138, 42, .28);
+      text-align: center;
     }
 
     .progress-shell .view-results-btn {
@@ -967,6 +1103,10 @@
       gap: 10px
     }
 
+    .process-head {
+      align-items: flex-start;
+    }
+
     .process-pulse,
     .status-dot,
     .transport-orb {
@@ -994,7 +1134,23 @@
     .process-meta {
       gap: 6px;
       align-items: flex-end;
-      flex-direction: column
+      flex-direction: column;
+      flex: 0 0 164px;
+      max-width: 164px;
+    }
+
+    .process-meta-stack {
+      width: 100%;
+      display: grid;
+      gap: 6px;
+    }
+
+    .process-meta-line {
+      display: flex;
+      align-items: baseline;
+      justify-content: flex-end;
+      gap: 8px;
+      min-width: 0;
     }
 
     .process-time {
@@ -1456,8 +1612,8 @@
       align-items: center;
       gap: 10px;
       padding: 12px 24px;
-      background: var(--accent);
-      color: #000;
+      background: linear-gradient(180deg, var(--utility), #2f9f7a);
+      color: #04130d;
       border: none;
       border-radius: var(--radius-sm);
       font-weight: 800;
@@ -1469,7 +1625,7 @@
 
     .download-all-btn:hover {
       transform: scale(1.02) translateY(-2px);
-      box-shadow: 0 10px 25px rgba(255, 138, 42, 0.3);
+      box-shadow: 0 10px 25px var(--utility-glow);
     }
 
     .transport {
@@ -2066,8 +2222,8 @@
       align-items: center;
       gap: 10px;
       padding: 14px 22px;
-      background: var(--accent);
-      color: #110904;
+      background: linear-gradient(180deg, var(--utility), #2f9f7a);
+      color: #04130d;
       border: none;
       border-radius: var(--radius-sm);
       font: 800 .85rem/1 "IBM Plex Mono", monospace;
@@ -2075,7 +2231,7 @@
       letter-spacing: .06em;
       text-decoration: none;
       cursor: pointer;
-      box-shadow: 0 8px 32px rgba(255, 138, 42, .35), 0 2px 8px rgba(0, 0, 0, .5);
+      box-shadow: 0 8px 32px var(--utility-glow), 0 2px 8px rgba(0, 0, 0, .5);
       transition: all .2s cubic-bezier(.175, .885, .32, 1.275);
     }
 
@@ -2085,7 +2241,7 @@
 
     .download-fab:hover {
       transform: translateY(-2px) scale(1.02);
-      box-shadow: 0 12px 40px rgba(255, 138, 42, .45), 0 4px 12px rgba(0, 0, 0, .5);
+      box-shadow: 0 12px 40px rgba(55, 179, 138, .45), 0 4px 12px rgba(0, 0, 0, .5);
     }
 
     body.has-global-player .download-fab {
@@ -2140,6 +2296,64 @@
       display: none;
     }
 
+    .toast-region {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 1200;
+      display: grid;
+      gap: 10px;
+      width: min(340px, calc(100vw - 32px));
+      pointer-events: none;
+    }
+
+    .toast-item {
+      pointer-events: auto;
+      display: grid;
+      gap: 4px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 138, 42, .28);
+      background: linear-gradient(180deg, rgba(24, 16, 11, .96), rgba(10, 8, 6, .98));
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .36);
+      transform: translateY(-4px);
+      opacity: 0;
+      animation: toastIn .18s ease forwards;
+    }
+
+    .toast-item strong {
+      font: 700 .72rem/1 "IBM Plex Mono", monospace;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .toast-item span {
+      font-size: .82rem;
+      line-height: 1.45;
+      color: var(--text);
+    }
+
+    .toast-item[data-tone="success"] {
+      border-color: rgba(94, 219, 145, .35);
+    }
+
+    .toast-item[data-tone="success"] strong {
+      color: #5edb91;
+    }
+
+    .toast-item[data-tone="error"] {
+      border-color: rgba(255, 110, 72, .42);
+    }
+
+    .toast-item[data-tone="error"] strong {
+      color: var(--danger);
+    }
+
+    .toast-item.toast-out {
+      animation: toastOut .18s ease forwards;
+    }
+
     @keyframes spin {
       to {
         transform: rotate(360deg)
@@ -2175,6 +2389,12 @@
 
       .results-secondary {
         grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+
+      body[data-app-state="file_loaded"] .hero-grid,
+      body[data-app-state="analyzing"] .hero-grid,
+      body[data-app-state="complete"] .hero-grid {
+        grid-template-columns: minmax(352px, 390px) minmax(0, 1fr);
       }
 
       .process-stage-rail {
@@ -2214,7 +2434,29 @@
       }
 
       .process-meta {
-        align-items: flex-start
+        align-items: flex-start;
+        flex: 1 1 auto;
+        max-width: none;
+        width: 100%;
+      }
+
+      .process-meta-stack {
+        width: 100%;
+      }
+
+      .process-meta-line {
+        justify-content: flex-start;
+      }
+
+      .progress-summary {
+        grid-template-columns: 1fr;
+        align-items: flex-start;
+      }
+
+      .toast-region {
+        top: 10px;
+        right: 10px;
+        width: min(340px, calc(100vw - 20px));
       }
 
       .stem-top,
@@ -2286,6 +2528,20 @@
         flex-direction: column;
       }
     }
+
+    @keyframes toastIn {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes toastOut {
+      to {
+        transform: translateY(-4px);
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 
@@ -2322,20 +2578,17 @@
           </div>
 
           <div class="quality-selector">
-            <span class="eyebrow"
-              style="margin-bottom: 8px; display: block; font-size: 0.75rem; letter-spacing: 0.08em;">Processing
+            <span class="eyebrow quality-title">Processing
               Quality</span>
             <div class="quality-grid">
               <button type="button" class="quality-opt active" data-quality="fast">Fast</button>
               <button type="button" class="quality-opt" data-quality="accurate">Accurate</button>
             </div>
-            <label class="skip-opt" style="margin-top: 16px; display: block; cursor: pointer; user-select: none;">
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <input type="checkbox" id="skipReportToggle"
-                  style="width: 16px; height: 16px; accent-color: var(--accent);">
+            <label class="skip-opt">
+              <div class="skip-opt-row">
+                <input type="checkbox" id="skipReportToggle">
                 <div>
-                  <span class="fine"
-                    style="font-size: 0.68rem; text-transform: uppercase; font-weight: 800; color: var(--text);">Skip AI
+                  <span class="fine">Skip AI
                     Production Report</span>
                   <span class="skip-ai-sublabel">Faster processing, no production insights</span>
                 </div>
@@ -2350,18 +2603,19 @@
               <div class="fine" style="font-weight: 700; color: var(--accent);">Re-analyzing section...</div>
             </div>
             <div class="process-head">
-              <div>
+              <div class="progress-head-main">
                 <div class="process-kicker"><span class="process-pulse"></span><span id="processStage"
                     class="eyebrow">Queued</span></div>
                 <strong id="progressLabel">Processing</strong>
               </div>
               <div class="process-meta">
-                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
-                  <div style="display: flex; align-items: baseline; gap: 8px;">
+                <div class="process-meta-stack">
+                  <div class="process-meta-line">
                     <strong id="progressValue">0%</strong>
                     <span id="processElapsed" class="process-time">00:00</span>
                   </div>
-                  <button id="cancelBtn" class="fine"
+                  <button id="timelineToggleBtn" class="ghost progress-toggle-btn" type="button" aria-expanded="true">Collapse</button>
+                  <button id="cancelBtn" class="fine cancel-analysis-btn"
                     style="background: rgba(255,110,72,0.1); border: 1px solid rgba(255,110,72,0.3); color: var(--danger); padding: 4px 8px; border-radius: 8px; cursor: pointer; font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">Cancel
                     Analysis</button>
                 </div>
@@ -2371,6 +2625,12 @@
               separation runs.</p>
             <div class="bar">
               <div id="progressFill" class="fill"></div>
+            </div>
+            <div id="progressSummary" class="progress-summary">
+              <div class="progress-summary-copy">
+                <strong id="progressSummaryTitle">Analysis in progress</strong>
+                <span id="progressSummaryMeta">Timeline is condensed. Expand to inspect every step and technical log.</span>
+              </div>
             </div>
             <div id="processStageRail" class="process-stage-rail"></div>
             <div class="activity-panel">
@@ -2531,6 +2791,8 @@
     Download All
   </a>
 
+  <div id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="false"></div>
+
   <script>
     window.addEventListener('error', e => {
       alert("JS Error: " + e.message + " at line " + e.lineno);
@@ -2564,7 +2826,11 @@
       previewSeekBounds: null,
       processClock: 0,
       processBaseTime: 0,
+      processEndTime: 0,
       loopPreview: false,
+      timelineMode: 'expanded',
+      lastToastAt: 0,
+      lastToastKey: '',
       lastAnalyzedStart: undefined,
       lastAnalyzedEnd: undefined,
     };
@@ -2594,6 +2860,10 @@
     const technicalPanel = document.getElementById('technicalPanel');
     const technicalSummary = document.getElementById('technicalSummary');
     const technicalLog = document.getElementById('technicalLog');
+    const timelineToggleBtn = document.getElementById('timelineToggleBtn');
+    const progressSummary = document.getElementById('progressSummary');
+    const progressSummaryTitle = document.getElementById('progressSummaryTitle');
+    const progressSummaryMeta = document.getElementById('progressSummaryMeta');
     const fileName = document.getElementById('fileName');
     const fileMeta = document.getElementById('fileMeta');
     const waveform = document.getElementById('waveform');
@@ -2642,6 +2912,7 @@
     const gpPlayBtn = document.getElementById('gpPlayBtn');
     const gpCloseBtn = document.getElementById('gpCloseBtn');
     const downloadFab = document.getElementById('downloadFab');
+    const toastRegion = document.getElementById('toastRegion');
     const stemTabs = document.getElementById('stemTabs');
     state.player.preload = 'auto';
     updateAppUIState('idle');
@@ -2716,6 +2987,10 @@
       fileInput.click();
     });
 
+    timelineToggleBtn.addEventListener('click', () => {
+      setTimelineMode(state.timelineMode === 'compact' ? 'expanded' : 'compact');
+    });
+
     function updateAppUIState(stateName) {
       document.body.dataset.appState = stateName;
       if (stateName === 'file_loaded') {
@@ -2731,6 +3006,65 @@
       } else {
         analyzeBtn.classList.remove('pulse');
       }
+    }
+
+    function setTimelineMode(mode) {
+      const nextMode = mode === 'compact' ? 'compact' : 'expanded';
+      state.timelineMode = nextMode;
+      const isCompact = nextMode === 'compact';
+      progressShell.classList.toggle('timeline-compact', isCompact);
+      progressShell.classList.toggle('timeline-expanded', !isCompact);
+      timelineToggleBtn.textContent = isCompact ? 'Expand' : 'Collapse';
+      timelineToggleBtn.setAttribute('aria-expanded', isCompact ? 'false' : 'true');
+    }
+
+    function updateProgressSummary(data) {
+      if (!data) {
+        progressSummaryTitle.textContent = 'Analysis in progress';
+        progressSummaryMeta.textContent = 'Compact view active. Use Expand to inspect full timeline and logs.';
+        return;
+      }
+      if (data.status === 'done') {
+        progressSummaryTitle.textContent = 'Analysis complete';
+        progressSummaryMeta.textContent = `Elapsed ${processElapsed.textContent}. Compact view keeps focus on results.`;
+        return;
+      }
+      if (data.status === 'error') {
+        progressSummaryTitle.textContent = 'Processing stopped';
+        progressSummaryMeta.textContent = 'Expand timeline to review stage history and technical logs.';
+        return;
+      }
+      progressSummaryTitle.textContent = 'Analysis in progress';
+      progressSummaryMeta.textContent = `${processStage.textContent} • ${progressValue.textContent}. Expand timeline to view live activity.`;
+    }
+
+    function showToast(messageText, tone = 'info', dedupeKey = '') {
+      if (!toastRegion || !messageText) return;
+      const now = Date.now();
+      const key = dedupeKey || `${tone}:${messageText}`;
+      if (state.lastToastKey === key && now - state.lastToastAt < 3000) return;
+      state.lastToastKey = key;
+      state.lastToastAt = now;
+
+      const toast = document.createElement('div');
+      toast.className = 'toast-item';
+      toast.dataset.tone = tone;
+      toast.innerHTML = `<strong>${tone === 'error' ? 'Alert' : tone === 'success' ? 'Success' : 'Status'}</strong><span>${messageText}</span>`;
+
+      let removeTimer = 0;
+      const scheduleRemove = () => {
+        clearTimeout(removeTimer);
+        removeTimer = setTimeout(() => {
+          toast.classList.add('toast-out');
+          setTimeout(() => toast.remove(), 180);
+        }, 3600);
+      };
+
+      toast.addEventListener('mouseenter', () => clearTimeout(removeTimer));
+      toast.addEventListener('mouseleave', scheduleRemove);
+
+      toastRegion.appendChild(toast);
+      scheduleRemove();
     }
     trimStartHandle.addEventListener('pointerdown', (event) => beginTrimDrag(event, 'start'));
     trimEndHandle.addEventListener('pointerdown', (event) => beginTrimDrag(event, 'end'));
@@ -2815,6 +3149,7 @@
     analyzeBtn.addEventListener('click', async () => {
       if (!state.file) return setMessage('Choose an MP3, WAV, AAC, or M4A file first.', true);
       analyzeBtn.disabled = true;
+      setTimelineMode('expanded');
 
       const isReAnalysis = progressShell.dataset.status === 'done';
 
@@ -2882,6 +3217,7 @@
         resetProcessingUI();
         analyzeBtn.disabled = false;
         setMessage('Analysis cancelled by user.', true);
+        showToast('Analysis cancelled.', 'info', `cancel:${Date.now()}`);
       } catch (error) {
         setMessage(error.message, true);
         cancelBtn.disabled = false;
@@ -2892,9 +3228,11 @@
     function beginPolling() {
       clearInterval(state.poller);
       progressShell.classList.add('active');
+      setTimelineMode('expanded');
       renderProcessingState({ status: 'queued', stage: 'queue', progress: 5, message: 'Upload received.', activity: [{ at: new Date().toISOString(), phase: 'queue', text: 'Upload accepted. Waiting for the background worker to begin.' }], technical_logs: [] });
       state.poller = setInterval(checkStatus, 1000);
       updateAppUIState('analyzing');
+      showToast('Analysis started. Timeline is now live.', 'info', `start:${state.jobId || 'pending'}`);
       checkStatus();
     }
 
@@ -2914,6 +3252,7 @@
           clearInterval(state.poller);
           analyzeBtn.disabled = false;
           setMessage('Analysis complete.');
+          showToast('Analysis complete. Results are ready.', 'success', `done:${state.jobId}`);
           stopProcessClock();
           reAnalyzeOverlay.classList.remove('active');
           nextStepsArea.classList.add('active');
@@ -2933,6 +3272,7 @@
           stopProcessClock();
           storeSession({ jobId: state.jobId });
           setMessage(data.message || 'Processing failed.', true);
+          showToast(data.message || 'Processing failed. Check technical log for details.', 'error', `status-error:${state.jobId}`);
         }
       } catch (error) {
         clearInterval(state.poller);
@@ -2941,6 +3281,7 @@
         progressShell.dataset.status = 'error';
         stopProcessClock();
         setMessage(error.message || 'Status polling failed.', true);
+        showToast(error.message || 'Status polling failed.', 'error', 'polling-error');
       }
     }
 
@@ -3444,9 +3785,18 @@
       const isDone = data.status === 'done';
       const isError = data.status === 'error';
       cancelBtn.style.display = (isDone || isError) ? 'none' : 'block';
-
+      if (isDone) {
+        setTimelineMode('compact');
+      } else if (isError) {
+        setTimelineMode('expanded');
+      }
       if (isError && (data.technical_logs || []).length) technicalPanel.open = true;
-      syncProcessClock(data.started_at || data.created_at, data.status);
+      syncProcessClock(
+        data.started_at || data.created_at,
+        data.status,
+        data.finished_at || data.completed_at || data.updated_at || data.ended_at
+      );
+      updateProgressSummary(data);
     }
 
     function resolveProcessStage(data) {
@@ -3565,6 +3915,8 @@
       progressLabel.textContent = 'Processing';
       processStage.textContent = 'Queued';
       progressCaption.textContent = 'Demucs can take a little while. Keep this tab open while the separation runs.';
+      setTimelineMode('expanded');
+      updateProgressSummary(null);
       processStageRail.innerHTML = PROCESS_STAGES.map((step, index) => `
         <div class="process-step">
           <span class="process-step-index">Step ${index + 1}</span>
@@ -3576,24 +3928,34 @@
       technicalLog.textContent = 'Technical details will appear here when the separator reports them.';
       technicalPanel.open = false;
       processElapsed.textContent = '00:00';
+      state.processBaseTime = 0;
+      state.processEndTime = 0;
       downloadFab.classList.remove('visible');
       globalPlayer.classList.remove('visible');
       document.body.classList.remove('has-global-player');
     }
 
-    function syncProcessClock(baseTime, status) {
+    function syncProcessClock(baseTime, status, endTime = null) {
       const nextBase = baseTime ? Date.parse(baseTime) : 0;
       if (!nextBase) {
         stopProcessClock();
         processElapsed.textContent = '00:00';
+        state.processBaseTime = 0;
+        state.processEndTime = 0;
         return;
       }
       state.processBaseTime = nextBase;
-      updateProcessElapsed();
       if (status === 'processing' || status === 'queued') {
+        state.processEndTime = 0;
+        updateProcessElapsed();
         if (state.processClock) return;
         state.processClock = setInterval(updateProcessElapsed, 1000);
       } else {
+        if (!state.processEndTime) {
+          const parsedEnd = endTime ? Date.parse(endTime) : 0;
+          state.processEndTime = parsedEnd || Date.now();
+        }
+        updateProcessElapsed();
         stopProcessClock();
       }
     }
@@ -3609,7 +3971,8 @@
         processElapsed.textContent = '00:00';
         return;
       }
-      const seconds = Math.max(0, Math.floor((Date.now() - state.processBaseTime) / 1000));
+      const anchorTime = state.processEndTime || Date.now();
+      const seconds = Math.max(0, Math.floor((anchorTime - state.processBaseTime) / 1000));
       processElapsed.textContent = formatClock(seconds);
     }
 
@@ -3689,6 +4052,7 @@
         await restorePreviewFromSession(data);
         renderProcessingState(data);
         if (data.status === 'processing' || data.status === 'queued') {
+          setTimelineMode('expanded');
           analyzeBtn.disabled = true;
           clearInterval(state.poller);
           state.poller = setInterval(checkStatus, 1000);
@@ -3697,6 +4061,7 @@
         }
         analyzeBtn.disabled = false;
         if (data.status === 'done') {
+          setTimelineMode('compact');
           await loadResults();
           setMessage('Restored the previous analysis session.');
           return;
