@@ -23,6 +23,9 @@
       --accent-soft: #ffd2a1;
       --accent-faint: rgba(255, 138, 42, .12);
       --accent-faint-2: rgba(255, 138, 42, .18);
+      --utility: #37b38a;
+      --utility-soft: #8ce8cc;
+      --utility-glow: rgba(55, 179, 138, .32);
       --danger: #ff6e48;
       --stem-vocals: #64d2ff;
       --stem-drums: #ff6b6b;
@@ -184,7 +187,7 @@
     body[data-app-state="file_loaded"] .hero-grid,
     body[data-app-state="analyzing"] .hero-grid,
     body[data-app-state="complete"] .hero-grid {
-      grid-template-columns: 360px 1fr;
+      grid-template-columns: minmax(392px, 420px) minmax(0, 1fr);
     }
 
     body[data-app-state="file_loaded"] .hero h1,
@@ -230,16 +233,16 @@
     .file-info-strip {
       display: none;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 16px 20px;
+      gap: 10px;
+      padding: 14px 14px;
+      grid-template-columns: minmax(0, 1fr) auto;
       background: rgba(255, 138, 42, 0.04);
       border: 1px solid rgba(255, 138, 42, 0.12);
       border-radius: var(--radius-md);
     }
 
     body:not([data-app-state="idle"]) .file-info-strip {
-      display: flex;
+      display: grid;
     }
 
     .file-info-strip .details {
@@ -250,7 +253,7 @@
     .file-info-strip .name {
       display: block;
       font-weight: 700;
-      font-size: 0.95rem;
+      font-size: 0.88rem;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -266,9 +269,13 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-height: 34px;
-      padding: 6px 12px;
-      font-size: 0.7rem;
+      flex-shrink: 0;
+      min-width: 68px;
+      min-height: 32px;
+      padding: 6px 9px;
+      font-size: 0.62rem;
+      letter-spacing: 0.035em;
+      line-height: 1;
       border-radius: var(--radius-sm);
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -378,13 +385,15 @@
 
     .skip-ai-sublabel {
       display: block;
-      font-size: 0.68rem;
+      font-size: 0.62rem;
       color: var(--muted);
       font-style: italic;
       margin-top: 4px;
       font-weight: 400;
       text-transform: none;
       letter-spacing: normal;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
     }
 
     .upload {
@@ -477,7 +486,7 @@
     /* Quality Selector */
     .quality-selector {
       margin: 20px 0;
-      padding: 18px;
+      padding: 16px;
       background: rgba(255, 255, 255, .02);
       border: 1px solid var(--line);
       border-radius: var(--radius-md);
@@ -493,8 +502,8 @@
 
     .quality-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
       margin-top: 10px;
       background: #000;
       padding: 5px;
@@ -505,12 +514,14 @@
     .quality-opt {
       background: transparent;
       border: none;
-      padding: 10px;
+      min-width: 0;
+      padding: 10px 8px;
       border-radius: var(--radius-sm);
       color: var(--muted);
-      font: 700 .85rem/1 "IBM Plex Mono", monospace;
+      font: 700 .76rem/1 "IBM Plex Mono", monospace;
       text-transform: uppercase;
-      letter-spacing: .05em;
+      letter-spacing: .02em;
+      white-space: nowrap;
       cursor: pointer;
       transition: all .2s ease;
       display: flex;
@@ -533,7 +544,7 @@
 
     .skip-opt-row {
       display: grid;
-      grid-template-columns: 16px 1fr;
+      grid-template-columns: 16px minmax(0, 1fr);
       align-items: start;
       column-gap: 10px;
     }
@@ -547,11 +558,12 @@
 
     .skip-opt .fine {
       display: block;
-      font-size: 0.68rem;
+      font-size: 0.64rem;
       text-transform: uppercase;
       font-weight: 800;
       color: var(--text);
       line-height: 1.2;
+      overflow-wrap: anywhere;
     }
 
     .pro-mixing-logic {
@@ -931,6 +943,17 @@
       gap: 14px
     }
 
+    .progress-head-main {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .progress-head-main strong {
+      display: block;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
     .progress-shell[data-status=done] {
       border-color: rgba(255, 138, 42, .4)
     }
@@ -951,17 +974,27 @@
     }
 
     .progress-toggle-btn {
-      padding: 7px 10px;
+      display: inline-flex;
+      justify-content: center;
+      width: 100%;
+      padding: 8px 10px;
       border-color: rgba(255, 138, 42, .28);
       font-size: .64rem;
       letter-spacing: .08em;
-      white-space: nowrap;
+    }
+
+    .cancel-analysis-btn {
+      width: 100%;
+      justify-content: center;
+      padding: 8px 10px;
+      line-height: 1.2;
+      white-space: normal;
     }
 
     .progress-summary {
       display: none;
-      grid-template-columns: 1fr auto;
-      align-items: center;
+      grid-template-columns: 1fr;
+      align-items: start;
       gap: 10px;
       padding: 10px 12px;
       border-radius: var(--radius-sm);
@@ -977,6 +1010,8 @@
       display: grid;
       gap: 3px;
       min-width: 0;
+      text-align: center;
+      justify-items: center;
     }
 
     .progress-summary-copy strong {
@@ -988,14 +1023,17 @@
       font-size: .76rem;
       color: var(--muted);
       line-height: 1.45;
+      max-width: 36ch;
+      margin: 0 auto;
     }
 
     .progress-summary-action {
+      display: none;
       padding: 8px 11px;
       font-size: .62rem;
       letter-spacing: .08em;
       border-color: rgba(255, 138, 42, .28);
-      white-space: nowrap;
+      text-align: center;
     }
 
     .progress-shell .view-results-btn {
@@ -1065,6 +1103,10 @@
       gap: 10px
     }
 
+    .process-head {
+      align-items: flex-start;
+    }
+
     .process-pulse,
     .status-dot,
     .transport-orb {
@@ -1092,7 +1134,23 @@
     .process-meta {
       gap: 6px;
       align-items: flex-end;
-      flex-direction: column
+      flex-direction: column;
+      flex: 0 0 164px;
+      max-width: 164px;
+    }
+
+    .process-meta-stack {
+      width: 100%;
+      display: grid;
+      gap: 6px;
+    }
+
+    .process-meta-line {
+      display: flex;
+      align-items: baseline;
+      justify-content: flex-end;
+      gap: 8px;
+      min-width: 0;
     }
 
     .process-time {
@@ -1554,8 +1612,8 @@
       align-items: center;
       gap: 10px;
       padding: 12px 24px;
-      background: var(--accent);
-      color: #000;
+      background: linear-gradient(180deg, var(--utility), #2f9f7a);
+      color: #04130d;
       border: none;
       border-radius: var(--radius-sm);
       font-weight: 800;
@@ -1567,7 +1625,7 @@
 
     .download-all-btn:hover {
       transform: scale(1.02) translateY(-2px);
-      box-shadow: 0 10px 25px rgba(255, 138, 42, 0.3);
+      box-shadow: 0 10px 25px var(--utility-glow);
     }
 
     .transport {
@@ -2164,8 +2222,8 @@
       align-items: center;
       gap: 10px;
       padding: 14px 22px;
-      background: var(--accent);
-      color: #110904;
+      background: linear-gradient(180deg, var(--utility), #2f9f7a);
+      color: #04130d;
       border: none;
       border-radius: var(--radius-sm);
       font: 800 .85rem/1 "IBM Plex Mono", monospace;
@@ -2173,7 +2231,7 @@
       letter-spacing: .06em;
       text-decoration: none;
       cursor: pointer;
-      box-shadow: 0 8px 32px rgba(255, 138, 42, .35), 0 2px 8px rgba(0, 0, 0, .5);
+      box-shadow: 0 8px 32px var(--utility-glow), 0 2px 8px rgba(0, 0, 0, .5);
       transition: all .2s cubic-bezier(.175, .885, .32, 1.275);
     }
 
@@ -2183,7 +2241,7 @@
 
     .download-fab:hover {
       transform: translateY(-2px) scale(1.02);
-      box-shadow: 0 12px 40px rgba(255, 138, 42, .45), 0 4px 12px rgba(0, 0, 0, .5);
+      box-shadow: 0 12px 40px rgba(55, 179, 138, .45), 0 4px 12px rgba(0, 0, 0, .5);
     }
 
     body.has-global-player .download-fab {
@@ -2333,6 +2391,12 @@
         grid-template-columns: repeat(2, minmax(0, 1fr))
       }
 
+      body[data-app-state="file_loaded"] .hero-grid,
+      body[data-app-state="analyzing"] .hero-grid,
+      body[data-app-state="complete"] .hero-grid {
+        grid-template-columns: minmax(352px, 390px) minmax(0, 1fr);
+      }
+
       .process-stage-rail {
         grid-template-columns: repeat(2, minmax(0, 1fr))
       }
@@ -2370,7 +2434,18 @@
       }
 
       .process-meta {
-        align-items: flex-start
+        align-items: flex-start;
+        flex: 1 1 auto;
+        max-width: none;
+        width: 100%;
+      }
+
+      .process-meta-stack {
+        width: 100%;
+      }
+
+      .process-meta-line {
+        justify-content: flex-start;
       }
 
       .progress-summary {
@@ -2528,19 +2603,19 @@
               <div class="fine" style="font-weight: 700; color: var(--accent);">Re-analyzing section...</div>
             </div>
             <div class="process-head">
-              <div>
+              <div class="progress-head-main">
                 <div class="process-kicker"><span class="process-pulse"></span><span id="processStage"
                     class="eyebrow">Queued</span></div>
                 <strong id="progressLabel">Processing</strong>
               </div>
               <div class="process-meta">
-                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
-                  <div style="display: flex; align-items: baseline; gap: 8px;">
+                <div class="process-meta-stack">
+                  <div class="process-meta-line">
                     <strong id="progressValue">0%</strong>
                     <span id="processElapsed" class="process-time">00:00</span>
                   </div>
-                  <button id="timelineToggleBtn" class="ghost progress-toggle-btn" type="button" aria-expanded="true">Collapse Timeline</button>
-                  <button id="cancelBtn" class="fine"
+                  <button id="timelineToggleBtn" class="ghost progress-toggle-btn" type="button" aria-expanded="true">Collapse</button>
+                  <button id="cancelBtn" class="fine cancel-analysis-btn"
                     style="background: rgba(255,110,72,0.1); border: 1px solid rgba(255,110,72,0.3); color: var(--danger); padding: 4px 8px; border-radius: 8px; cursor: pointer; font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">Cancel
                     Analysis</button>
                 </div>
@@ -2556,7 +2631,6 @@
                 <strong id="progressSummaryTitle">Analysis in progress</strong>
                 <span id="progressSummaryMeta">Timeline is condensed. Expand to inspect every step and technical log.</span>
               </div>
-              <button id="expandTimelineBtn" class="ghost progress-summary-action" type="button">Show Analysis Steps & Log</button>
             </div>
             <div id="processStageRail" class="process-stage-rail"></div>
             <div class="activity-panel">
@@ -2752,6 +2826,7 @@
       previewSeekBounds: null,
       processClock: 0,
       processBaseTime: 0,
+      processEndTime: 0,
       loopPreview: false,
       timelineMode: 'expanded',
       lastToastAt: 0,
@@ -2789,7 +2864,6 @@
     const progressSummary = document.getElementById('progressSummary');
     const progressSummaryTitle = document.getElementById('progressSummaryTitle');
     const progressSummaryMeta = document.getElementById('progressSummaryMeta');
-    const expandTimelineBtn = document.getElementById('expandTimelineBtn');
     const fileName = document.getElementById('fileName');
     const fileMeta = document.getElementById('fileMeta');
     const waveform = document.getElementById('waveform');
@@ -2917,10 +2991,6 @@
       setTimelineMode(state.timelineMode === 'compact' ? 'expanded' : 'compact');
     });
 
-    expandTimelineBtn.addEventListener('click', () => {
-      setTimelineMode('expanded');
-    });
-
     function updateAppUIState(stateName) {
       document.body.dataset.appState = stateName;
       if (stateName === 'file_loaded') {
@@ -2944,19 +3014,19 @@
       const isCompact = nextMode === 'compact';
       progressShell.classList.toggle('timeline-compact', isCompact);
       progressShell.classList.toggle('timeline-expanded', !isCompact);
-      timelineToggleBtn.textContent = isCompact ? 'Expand Timeline' : 'Collapse Timeline';
+      timelineToggleBtn.textContent = isCompact ? 'Expand' : 'Collapse';
       timelineToggleBtn.setAttribute('aria-expanded', isCompact ? 'false' : 'true');
     }
 
     function updateProgressSummary(data) {
       if (!data) {
         progressSummaryTitle.textContent = 'Analysis in progress';
-        progressSummaryMeta.textContent = 'Timeline is condensed. Expand to inspect every step and technical log.';
+        progressSummaryMeta.textContent = 'Compact view active. Use Expand to inspect full timeline and logs.';
         return;
       }
       if (data.status === 'done') {
         progressSummaryTitle.textContent = 'Analysis complete';
-        progressSummaryMeta.textContent = `Elapsed ${processElapsed.textContent}. Timeline condensed so you can focus on results.`;
+        progressSummaryMeta.textContent = `Elapsed ${processElapsed.textContent}. Compact view keeps focus on results.`;
         return;
       }
       if (data.status === 'error') {
@@ -3720,10 +3790,13 @@
       } else if (isError) {
         setTimelineMode('expanded');
       }
-      updateProgressSummary(data);
-
       if (isError && (data.technical_logs || []).length) technicalPanel.open = true;
-      syncProcessClock(data.started_at || data.created_at, data.status);
+      syncProcessClock(
+        data.started_at || data.created_at,
+        data.status,
+        data.finished_at || data.completed_at || data.updated_at || data.ended_at
+      );
+      updateProgressSummary(data);
     }
 
     function resolveProcessStage(data) {
@@ -3855,24 +3928,34 @@
       technicalLog.textContent = 'Technical details will appear here when the separator reports them.';
       technicalPanel.open = false;
       processElapsed.textContent = '00:00';
+      state.processBaseTime = 0;
+      state.processEndTime = 0;
       downloadFab.classList.remove('visible');
       globalPlayer.classList.remove('visible');
       document.body.classList.remove('has-global-player');
     }
 
-    function syncProcessClock(baseTime, status) {
+    function syncProcessClock(baseTime, status, endTime = null) {
       const nextBase = baseTime ? Date.parse(baseTime) : 0;
       if (!nextBase) {
         stopProcessClock();
         processElapsed.textContent = '00:00';
+        state.processBaseTime = 0;
+        state.processEndTime = 0;
         return;
       }
       state.processBaseTime = nextBase;
-      updateProcessElapsed();
       if (status === 'processing' || status === 'queued') {
+        state.processEndTime = 0;
+        updateProcessElapsed();
         if (state.processClock) return;
         state.processClock = setInterval(updateProcessElapsed, 1000);
       } else {
+        if (!state.processEndTime) {
+          const parsedEnd = endTime ? Date.parse(endTime) : 0;
+          state.processEndTime = parsedEnd || Date.now();
+        }
+        updateProcessElapsed();
         stopProcessClock();
       }
     }
@@ -3888,7 +3971,8 @@
         processElapsed.textContent = '00:00';
         return;
       }
-      const seconds = Math.max(0, Math.floor((Date.now() - state.processBaseTime) / 1000));
+      const anchorTime = state.processEndTime || Date.now();
+      const seconds = Math.max(0, Math.floor((anchorTime - state.processBaseTime) / 1000));
       processElapsed.textContent = formatClock(seconds);
     }
 
