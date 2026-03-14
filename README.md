@@ -101,6 +101,8 @@ The launcher automatically:
 
 ## Custom Port and Runtime Options
 
+All commands below assume you are inside `trackdissect/`.
+
 ### Prefer a specific port
 
 ```bash
@@ -236,7 +238,7 @@ No manual action required when using quick-native launchers; they auto-select a 
 
 ### Dependency install fails
 
-Retry with:
+Retry from inside `trackdissect/`:
 
 ```bash
 ./run-native.sh --force-deps
