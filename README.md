@@ -1,5 +1,7 @@
 # Audipsy
 
+![App Preview](https://github.com/user-attachments/assets/45a5ba95-cabb-4fcb-837b-a952937075c8)
+
 Audipsy is an MVP web application for AI-assisted music production analysis. It accepts a single MP3 or WAV upload, generates a waveform preview in the browser, separates the track into four stems with Demucs, extracts audio features with Librosa, and produces a production report with Gemini as the primary AI provider.
 
 The application uses a FastAPI backend and a single-file HTML, CSS, and JavaScript frontend. Job state is stored in memory, which keeps the implementation simple and easy to run locally.
